@@ -64,6 +64,9 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
   const [draggedId, setDraggedId] = useState<number | null>(null)
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
   
+  // Track the base/original key for transpose calculations
+  const [baseKey, setBaseKey] = useState('C')
+  
   // Saved songs from localStorage
   const [savedSongs, setSavedSongs] = useState<Song[]>(() => {
     try {
@@ -91,17 +94,17 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
   }, [songKey, tempo, timeSig, onMetaChange])
 
   // Auto-transpose chords when key changes via dropdown
-  const handleKeyChange = (oldKey: string) => {
-    const newIdx = NOTE_NAMES_FULL.indexOf(songKey)
+  const handleKeyChange = () => {
+    const currentIdx = NOTE_NAMES_FULL.indexOf(songKey)
     
-    if (newIdx === -1) return
+    if (currentIdx === -1) return
     
-    // Calculate semitone difference
-    const diff = newIdx - NOTE_NAMES_FULL.indexOf(oldKey)
+    // Calculate semitone difference from base key
+    const baseIdx = NOTE_NAMES_FULL.indexOf(baseKey)
+    const diff = currentIdx - baseIdx
     
     // Only transpose if there's a change and chords exist
     if (diff !== 0 && sections.some(s => s.chords.trim())) {
-      setSongKey(NOTE_NAMES_FULL[newIdx])
       setSections(prev => prev.map(s => ({
         ...s,
         chords: s.chords.split(/[\s,]+/).filter(Boolean).map(c => transposeChordName(c, diff)).join('  ')
@@ -148,7 +151,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
     a.click()
     URL.revokeObjectURL(url)
     
-    // Also save to localStorage
+    // Also save to localStorage (save current key as base key)
     const song: Song = {
       id: Date.now().toString(36) + Math.random().toString(36).slice(2),
       title,
@@ -162,6 +165,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
     const songs = [...savedSongs, song]
     setSavedSongs(songs)
     localStorage.setItem('sws_saved_songs', JSON.stringify(songs))
+    setBaseKey(songKey)  // Update base key to current (no transpose needed from now)
   }
 
   const loadFromStorage = (songId: string) => {
@@ -171,6 +175,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
     const song = savedSongs[index]
     setTitle(song.title)
     setSongKey(song.key)
+    setBaseKey(song.key)  // Track original key for transpose calc
     setTempo(song.tempo)
     setTimeSig(song.timeSig)
     
@@ -313,7 +318,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
             <label className="block mb-1.5 text-[11px] uppercase tracking-widest text-studio-muted">Key</label>
             <select
               value={songKey}
-              onChange={() => handleKeyChange(songKey)}
+              onChange={handleKeyChange}
               className="h-9 px-3 text-sm font-mono rounded-lg border border-studio-border bg-studio-bg text-studio-text focus:outline-none focus:border-emerald-500/60 transition-all appearance-none"
             >
               {KEYS.map(k => <option key={k} value={k}>{k}</option>)}
