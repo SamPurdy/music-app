@@ -34,4 +34,13 @@ White keys: [0,2,4,5,7,9,11] | Black keys: [1,3,6,8,10]
 `studio-bg` `studio-surface` `studio-surface-2` `studio-border` `studio-text` `studio-muted` `studio-accent`(sky) `studio-success`(green) `studio-purple` `studio-pink`
 
 ## After Making Changes
-Append a concise entry to `docs/DEVLOG.md` summarizing what changed and why.
+1. Run `npm run build` and report any TypeScript errors before declaring done
+2. Append a concise entry to `docs/DEVLOG.md` summarizing what changed and why
+3. **DO NOT commit or push** — show the user a list of changed files and wait for their approval
+
+## Workflow Rules for Local Model
+- **Read the target file before editing it** — never edit blindly from memory
+- **One file at a time** — complete and verify one change before moving to the next
+- **When unsure about an interface or function signature** — check `src/types/index.ts` or the relevant lib file
+- **If the task is large** — ask the user to break it into smaller steps rather than attempting everything in one response
+- **Context getting long?** — suggest running `/handoff` and starting a fresh session

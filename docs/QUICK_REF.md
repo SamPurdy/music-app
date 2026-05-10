@@ -56,4 +56,4 @@ studio-purple=#8b5cf6(scale)  studio-muted=#64748b  studio-border=white/8
 - No `any` types
 - All music theory → `src/lib/music-theory/` only
 - All audio → `synth.ts` only
-- After changes: `npm run build` → update DEVLOG → commit (no auto-push)
+- After changes: `npm run build` → update DEVLOG → **stop and wait for user to approve before committing**

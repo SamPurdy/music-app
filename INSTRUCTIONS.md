@@ -25,7 +25,7 @@
 npm run dev       # Start Vite dev server (port 5173)
 npm run build     # TypeScript check + production build
 npm run lint      # ESLint
-git add -A && git commit -m "message" && git push
+npm run build   # verify — then STOP and show user changed files for review
 ```
 
 ---
@@ -81,4 +81,4 @@ White keys: [0,2,4,5,7,9,11] — Black keys: [1,3,6,8,10]
 ## 8. After Making Changes
 1. Verify build: `npm run build`
 2. Append entry to `docs/DEVLOG.md` (template is at the top of that file)
-3. Commit and push: `git add -A && git commit -m "description" && git push`
+3. **Stop — do NOT commit.** Show the user a summary of changed files and wait for explicit approval before running any `git` command.

@@ -1,5 +1,5 @@
 ---
-description: End-of-session wrap-up — update HANDOFF.md, DEVLOG, and commit changes
+description: End-of-session wrap-up — update HANDOFF.md and DEVLOG, then summarize for user review
 agent: music-dev
 ---
 
@@ -17,12 +17,20 @@ Wrap up this coding session for Soundwave Studio:
    **Watch out:** any gotchas
    ```
 
-3. **Run `npm run build`** to verify no TypeScript errors before committing
+3. **Run `npm run build`** to verify no TypeScript errors
 
-4. **Commit all changes:**
-   ```bash
-   git add -A && git commit -m "brief description of session changes"
-   ```
-   Do NOT auto-push — user pushes manually.
+4. **Show user a summary** of all changed files and what was done. Do NOT commit — wait for the user to explicitly say "commit" or "push" before running any `git` command.
+
+Example summary to give the user:
+```
+✅ Build passes. Ready to commit when you are.
+
+Changed files:
+- src/components/SongStructureBuilder.tsx
+- docs/DEVLOG.md
+- docs/HANDOFF.md
+
+To commit: git add -A && git commit -m "your message"
+```
 
 Usage: /handoff

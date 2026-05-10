@@ -2,7 +2,7 @@
 
 > **LOCAL MODEL INSTRUCTIONS:**
 > - **Start of session:** Read this file FIRST (tiny, fast). Then read DEVLOG last 2 entries. Only read ARCHITECTURE.md if you need deeper reference.
-> - **End of session:** Overwrite the "Current State" section below with your summary before committing.
+> - **End of session:** Overwrite the "Current State" section below with your summary, then stop and wait for user to approve before committing.
 
 ---
 

@@ -36,4 +36,4 @@ If you feel your context is getting long, ask the user if they want you to `/han
 1. Run `npm run build` — verify no errors
 2. Update `docs/HANDOFF.md` with current state and next steps
 3. Append entry to top of `docs/DEVLOG.md`
-4. Commit: `git add -A && git commit -m "description"` (no auto-push)
+4. **Stop — do NOT commit.** Show the user a list of changed files and wait for explicit approval before any `git` command.

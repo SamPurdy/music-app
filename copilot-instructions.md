@@ -15,7 +15,7 @@ npm run dev       # Start Vite dev server (port 5173)
 npm run build     # TypeScript check + Vite production build
 npm run test      # Run Vitest tests
 npm run lint      # ESLint
-git add . && git commit -m "message"
+git add . && git commit -m "message"   # ONLY when user explicitly requests a commit
 ```
 
 ## Architecture
