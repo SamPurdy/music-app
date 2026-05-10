@@ -16,6 +16,21 @@
 
 ---
 
+## 2026-05-10 — Multiple song sections expandable at once
+
+**Changed files:** `src/components/SongStructureBuilder.tsx`
+
+**What changed:**
+- Removed `expanded` property from `Section` interface (no longer needed)
+- Changed `expandedId` state from single number to `Set<number>` for multiple selections
+- Updated `addSection()` to auto-expand new section
+- Updated `removeSection()` and click handlers to use Set methods
+- Updated DEFAULT_SECTIONS to remove expanded property
+
+**Why:** Users wanted to view multiple sections' chord/lyrics content simultaneously instead of having to toggle between them.
+
+---
+
 ## 2026-05-10 — Piano keyboard highlighting overhaul + size increase
 
 **Changed files:** `src/components/PianoKeyboard.tsx`, `src/components/TheoryExplorer.tsx`
