@@ -35,8 +35,9 @@ White keys: [0,2,4,5,7,9,11] | Black keys: [1,3,6,8,10]
 
 ## After Making Changes
 1. Run `npm run build` and report any TypeScript errors before declaring done
-2. Append a concise entry to `docs/DEVLOG.md` summarizing what changed and why
-3. **DO NOT commit or push** — show the user a list of changed files and wait for their approval
+2. **Update `docs/TODOS.md`:** mark any completed todos `[x]` and move to ✅ Completed; add new todos if bugs/improvements are discovered
+3. Append a concise entry to `docs/DEVLOG.md` summarizing what changed and why
+4. **DO NOT commit or push** — show the user a list of changed files and wait for their approval
 
 ## Workflow Rules for Local Model
 - **Read the target file before editing it** — never edit blindly from memory
