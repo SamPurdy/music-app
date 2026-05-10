@@ -21,7 +21,6 @@ interface Section {
   bars: number
   chords: string
   lyrics: string
-  expanded: boolean
 }
 
 const KEYS = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
@@ -42,13 +41,13 @@ function transposeChordName(chord: string, semitones: number): string {
 }
 
 const DEFAULT_SECTIONS: Section[] = [
-  { id: 1, name: 'Intro',   type: 'intro',   bars: 4,  chords: '', lyrics: '', expanded: false },
-  { id: 2, name: 'Verse 1', type: 'verse',   bars: 8,  chords: '', lyrics: '', expanded: false },
-  { id: 3, name: 'Chorus',  type: 'chorus',  bars: 8,  chords: '', lyrics: '', expanded: false },
-  { id: 4, name: 'Verse 2', type: 'verse',   bars: 8,  chords: '', lyrics: '', expanded: false },
-  { id: 5, name: 'Chorus',  type: 'chorus',  bars: 8,  chords: '', lyrics: '', expanded: false },
-  { id: 6, name: 'Bridge',  type: 'bridge',  bars: 8,  chords: '', lyrics: '', expanded: false },
-  { id: 7, name: 'Outro',   type: 'outro',   bars: 4,  chords: '', lyrics: '', expanded: false },
+  { id: 1, name: 'Intro',   type: 'intro',   bars: 4,  chords: '', lyrics: '' },
+  { id: 2, name: 'Verse 1', type: 'verse',   bars: 8,  chords: '', lyrics: '' },
+  { id: 3, name: 'Chorus',  type: 'chorus',  bars: 8,  chords: '', lyrics: '' },
+  { id: 4, name: 'Verse 2', type: 'verse',   bars: 8,  chords: '', lyrics: '' },
+  { id: 5, name: 'Chorus',  type: 'chorus',  bars: 8,  chords: '', lyrics: '' },
+  { id: 6, name: 'Bridge',  type: 'bridge',  bars: 8,  chords: '', lyrics: '' },
+  { id: 7, name: 'Outro',   type: 'outro',   bars: 4,  chords: '', lyrics: '' },
 ]
 
 interface Props {
@@ -63,7 +62,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
   const [sections, setSections] = useState<Section[]>(DEFAULT_SECTIONS)
   const [title, setTitle]       = useState('Untitled Song')
   const [draggedId, setDraggedId] = useState<number | null>(null)
-  const [expandedId, setExpandedId] = useState<number | null>(null)
+  const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     onMetaChange?.({ key: songKey, tempo, timeSig })
@@ -74,12 +73,17 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
 
   const addSection = (type: SectionType) => {
     const meta = SECTION_TYPES[type]
-    setSections(prev => [...prev, { id: nextIdRef.current++, name: meta.label, type, bars: 8, chords: '', lyrics: '', expanded: false }])
+    setSections(prev => [...prev, { id: nextIdRef.current++, name: meta.label, type, bars: 8, chords: '', lyrics: '' }])
+    setExpandedIds(prev => new Set(prev).add(nextIdRef.current - 1))
   }
 
   const removeSection = (id: number) => {
     setSections(prev => prev.filter(s => s.id !== id))
-    if (expandedId === id) setExpandedId(null)
+    setExpandedIds(prev => {
+      const next = new Set(prev)
+      next.delete(id)
+      return next
+    })
   }
 
   const transposeAllChords = (semitones: number) => {
@@ -115,7 +119,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
         if (data.key) setSongKey(data.key)
         if (data.tempo) setTempo(data.tempo)
         if (data.timeSig) setTimeSig(data.timeSig)
-        if (data.sections) setSections(data.sections.map((s: Section) => ({ ...s, expanded: false })))
+        if (data.sections) setSections(data.sections.map((s: Section) => ({ ...s })))
       } catch { /* invalid file */ }
     }
     reader.readAsText(file)
@@ -186,7 +190,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
         <AnimatePresence initial={false}>
           {sections.map((section) => {
             const meta = SECTION_TYPES[section.type]
-            const isExpanded = expandedId === section.id
+            const isExpanded = expandedIds.has(section.id)
             return (
               <motion.div
                 key={section.id}
@@ -229,12 +233,20 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
                     <input type="number" min={1} max={64} value={section.bars} onChange={e => updateSection(section.id, { bars: Number(e.target.value) || 4 })} className="w-10 text-center bg-studio-bg border border-studio-border rounded px-1 py-0.5 text-[10px] font-mono text-studio-muted focus:outline-none focus:border-emerald-500/60" />
                     <span>bars</span>
                   </div>
-                  <button
-                    onClick={() => setExpandedId(prev => prev === section.id ? null : section.id)}
-                    className="p-1 rounded text-studio-muted/50 hover:text-studio-accent hover:bg-studio-accent/10 transition-all shrink-0"
-                  >
-                    {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
-                  </button>
+                   <button
+                     onClick={() => setExpandedIds(prev => {
+                       const next = new Set(prev)
+                       if (next.has(section.id)) {
+                         next.delete(section.id)
+                       } else {
+                         next.add(section.id)
+                       }
+                       return next
+                     })}
+                     className="p-1 rounded text-studio-muted/50 hover:text-studio-accent hover:bg-studio-accent/10 transition-all shrink-0"
+                   >
+                     {isExpanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+                   </button>
                   <button onClick={() => removeSection(section.id)} className="p-1 rounded text-studio-muted/30 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100 shrink-0"><Trash2 size={12} /></button>
                 </div>
 
