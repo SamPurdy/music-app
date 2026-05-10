@@ -5,7 +5,7 @@ import { SCALES, getScaleNoteIndices } from '@/lib/music-theory/scales'
 import GuitarChordDiagram from './GuitarChordDiagram'
 import GuitarFretboard from './GuitarFretboard'
 
-type SubTab = 'capo' | 'chords' | 'scales'
+type SubTab = 'capo' | 'chords' | 'scales' | 'progression'
 
 const ROOTS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const ROOTS_LABEL = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
@@ -464,12 +464,117 @@ function ScalesTab() {
   )
 }
 
+// ── Progression Sub-tab ─────────────────────────────────────────────────────
+
+function ProgressionTab() {
+  const [input, setInput] = useState('C Am F G')
+  const [transpose, setTranspose] = useState(0)
+
+  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+  const FLAT_TO_SHARP: Record<string,string> = { Db:'C#',Eb:'D#',Fb:'E',Gb:'F#',Ab:'G#',Bb:'A#',Cb:'B' }
+
+  function transposeNote(root: string, semitones: number): string {
+    const r = FLAT_TO_SHARP[root] ?? root
+    const idx = NOTE_NAMES.indexOf(r)
+    if (idx === -1) return root
+    return NOTE_NAMES[((idx + semitones) % 12 + 12) % 12]
+  }
+
+  function transposeChord(chord: string, semitones: number): string {
+    const m = chord.match(/^([A-G][#b]?)(.*)$/)
+    if (!m) return chord
+    return transposeNote(m[1], semitones) + m[2]
+  }
+
+  const parsedChords = input
+    .split(/[\s,|/]+/)
+    .filter(Boolean)
+    .map(c => transposeChord(c, transpose))
+
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-4">
+        <p className="text-xs font-semibold text-studio-text">Chord Progression Viewer</p>
+        <p className="text-[11px] text-studio-muted">Enter chord names to see diagrams. Use spaces or commas to separate.</p>
+
+        {/* Input */}
+        <div>
+          <label className="text-[10px] uppercase tracking-widest text-studio-muted mb-1.5 block">Progression</label>
+          <input
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="C Am F G"
+            className="w-full h-10 px-3 text-sm font-mono rounded-lg border border-studio-border bg-studio-bg text-studio-text focus:outline-none focus:border-studio-accent/60 transition-all placeholder-studio-muted/40"
+          />
+        </div>
+
+        {/* Transpose control */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <span className="text-[10px] uppercase tracking-widest text-studio-muted shrink-0">Transpose</span>
+          <div className="flex items-center gap-1">
+            {[-6,-3,-2,-1].map(n => (
+              <button key={n} onClick={() => setTranspose(t => t + n)}
+                className="h-7 w-8 rounded-md border border-studio-border text-[10px] font-mono text-studio-muted hover:text-studio-accent hover:border-studio-accent/40 transition-all">
+                {n}
+              </button>
+            ))}
+            <span className="px-3 py-1 rounded-md bg-studio-bg border border-studio-accent/30 text-studio-accent font-mono text-xs min-w-[40px] text-center">
+              {transpose > 0 ? `+${transpose}` : transpose}
+            </span>
+            {[1,2,3,6].map(n => (
+              <button key={n} onClick={() => setTranspose(t => t + n)}
+                className="h-7 w-8 rounded-md border border-studio-border text-[10px] font-mono text-studio-muted hover:text-studio-accent hover:border-studio-accent/40 transition-all">
+                +{n}
+              </button>
+            ))}
+            <button onClick={() => setTranspose(0)}
+              className="h-7 px-2 ml-1 rounded-md border border-studio-border text-[10px] text-studio-muted hover:text-red-400 transition-all">
+              Reset
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Chord diagrams */}
+      {parsedChords.length > 0 && (
+        <div className="rounded-2xl border border-studio-border bg-studio-surface p-5">
+          <div className="flex flex-wrap gap-4">
+            {parsedChords.map((chord, i) => {
+              const voicing = GUITAR_CHORDS[chord]
+              if (!voicing) {
+                return (
+                  <div key={i} className="flex flex-col items-center gap-2">
+                    <div className="w-[140px] h-[175px] rounded-xl border border-dashed border-studio-border flex items-center justify-center">
+                      <span className="text-studio-muted text-xs text-center px-2">{chord}<br/><span className="text-[10px] opacity-50">No voicing</span></span>
+                    </div>
+                  </div>
+                )
+              }
+              return (
+                <GuitarChordDiagram
+                  key={i}
+                  chordName={chord}
+                  frets={voicing.frets}
+                  baseFret={voicing.baseFret}
+                  barres={voicing.barres}
+                  size="md"
+                />
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main GuitarLab Component ─────────────────────────────────────────────────
 
 const SUB_TABS: { id: SubTab; label: string }[] = [
-  { id: 'capo',   label: 'Capo' },
-  { id: 'chords', label: 'Chords' },
-  { id: 'scales', label: 'Scales' },
+  { id: 'capo',        label: 'Capo'        },
+  { id: 'chords',      label: 'Chords'      },
+  { id: 'scales',      label: 'Scales'      },
+  { id: 'progression', label: 'Progression' },
 ]
 
 export default function GuitarLab() {
@@ -502,9 +607,10 @@ export default function GuitarLab() {
       </div>
 
       {/* Sub-tab content */}
-      {subTab === 'capo'   && <CapoTab />}
-      {subTab === 'chords' && <ChordsTab />}
-      {subTab === 'scales' && <ScalesTab />}
+      {subTab === 'capo'        && <CapoTab />}
+      {subTab === 'chords'      && <ChordsTab />}
+      {subTab === 'scales'      && <ScalesTab />}
+      {subTab === 'progression' && <ProgressionTab />}
     </div>
   )
 }

@@ -7,9 +7,9 @@ interface GuitarChordDiagramProps {
 }
 
 const SIZE_CONFIG = {
-  sm: { w: 100, h: 120, pad: 10, headerH: 16, labelH: 14, dotR: 4, nutH: 4, fontSize: 7, baseFretFontSize: 7 },
-  md: { w: 140, h: 160, pad: 14, headerH: 20, labelH: 18, dotR: 6, nutH: 5, fontSize: 9, baseFretFontSize: 9 },
-  lg: { w: 180, h: 200, pad: 18, headerH: 24, labelH: 22, dotR: 8, nutH: 6, fontSize: 11, baseFretFontSize: 11 },
+  sm: { w: 100, h: 130, pad: 10, headerH: 16, labelH: 20, dotR: 4, nutH: 4, fontSize: 7, baseFretFontSize: 7, labelFontSize: 10 },
+  md: { w: 140, h: 175, pad: 14, headerH: 20, labelH: 26, dotR: 6, nutH: 5, fontSize: 9, baseFretFontSize: 9, labelFontSize: 14 },
+  lg: { w: 180, h: 220, pad: 18, headerH: 24, labelH: 32, dotR: 8, nutH: 6, fontSize: 11, baseFretFontSize: 11, labelFontSize: 18 },
 }
 
 export default function GuitarChordDiagram({ chordName, frets, baseFret = 1, barres = [], size = 'md' }: GuitarChordDiagramProps) {
@@ -115,7 +115,7 @@ export default function GuitarChordDiagram({ chordName, frets, baseFret = 1, bar
         x={w / 2}
         y={h - labelH * 0.2}
         textAnchor="middle"
-        fontSize={fontSize}
+        fontSize={cfg.labelFontSize}
         fill="#e2e8f0"
         fontFamily="monospace"
         fontWeight="bold"

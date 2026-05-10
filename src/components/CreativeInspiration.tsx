@@ -19,15 +19,14 @@ export default function CreativeInspiration() {
   // Debounced key change to avoid too many suggestions
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setSuggestions((prev) => [
-        ...prev.filter(s => !s.content.startsWith('New chord')),
-        ...suggestProgressions(currentKey, currentGenre).map(p => ({ 
-          type: p.type as CreativeSuggestion['type'], 
-          content: `Try ${p.content}`, 
-          context: p.context, 
-          confidence: 0.8 
+      setSuggestions(
+        suggestProgressions(currentKey, currentGenre).map(p => ({
+          type: p.type as CreativeSuggestion['type'],
+          content: `Try ${p.content}`,
+          context: p.context,
+          confidence: 0.8
         }))
-      ])
+      )
     }, 500)
 
     return () => clearTimeout(timeout)

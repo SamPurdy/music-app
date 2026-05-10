@@ -34,6 +34,7 @@ const HARMONIC_CONTEXT = [
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('song')
   const [midiStatus] = useState<MidiStatus>('idle')
+  const [songMeta, setSongMeta] = useState({ key: 'C', tempo: 120, timeSig: '4/4' })
 
   return (
     <div className="fixed inset-0 bg-studio-bg text-studio-text flex flex-col overflow-hidden">
@@ -120,9 +121,9 @@ function App() {
           </p>
 
           {[
-            { label: 'Key',   value: 'C Major', color: 'text-studio-accent' },
-            { label: 'Tempo', value: '120 BPM', color: 'text-studio-purple' },
-            { label: 'Time',  value: '4 / 4',   color: 'text-emerald-400'   },
+            { label: 'Key',   value: songMeta.key,              color: 'text-studio-accent' },
+            { label: 'Tempo', value: `${songMeta.tempo} BPM`,   color: 'text-studio-purple' },
+            { label: 'Time',  value: songMeta.timeSig,          color: 'text-emerald-400'   },
           ].map(({ label, value, color }) => (
             <div
               key={label}
@@ -155,7 +156,7 @@ function App() {
                   transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                   className="w-full min-h-full p-5 max-w-4xl mx-auto"
                 >
-                  {id === 'song'        && <SongStructureBuilder />}
+                  {id === 'song'        && <SongStructureBuilder onMetaChange={setSongMeta} />}
                   {id === 'chords'      && <ChordProgressionDisplay />}
                   {id === 'inspiration' && <CreativeInspiration />}
                   {id === 'theory'      && <TheoryExplorer />}

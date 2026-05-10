@@ -49,6 +49,7 @@ function getGuitar(): Tone.PluckSynth {
 // ── Single note playback ────────────────────────────────────
 export async function playPianoNote(noteIndex: number, octave = 4, duration = '8n'): Promise<void> {
   await Tone.start()
+  await Tone.loaded()
   getPiano().triggerAttackRelease(`${NOTE_NAMES[noteIndex]}${octave}`, duration)
 }
 
@@ -60,6 +61,7 @@ export async function playGuitarNote(noteIndex: number, octave = 3, duration = '
 // ── Chord playback ──────────────────────────────────────────
 export async function playPianoChord(noteNames: string[], duration = '2n'): Promise<void> {
   await Tone.start()
+  await Tone.loaded()
   getPiano().triggerAttackRelease(noteNames, duration)
 }
 
@@ -115,6 +117,7 @@ export async function playProgression(
   intervalMs = 1500,
 ): Promise<void> {
   await Tone.start()
+  await Tone.loaded()
   const chords = parseChordList(text)
   for (let i = 0; i < chords.length; i++) {
     if (i > 0) await new Promise<void>(r => setTimeout(r, intervalMs))
