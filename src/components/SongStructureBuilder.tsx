@@ -313,7 +313,7 @@ export default function SongStructureBuilder({ onMetaChange }: Props) {
             <label className="block mb-1.5 text-[11px] uppercase tracking-widest text-studio-muted">Key</label>
             <select
               value={songKey}
-              onChange={() => handleKeyChange(songKey)}
+              onChange={(e) => handleKeyChange(e.target.value)}
               className="h-9 px-3 text-sm font-mono rounded-lg border border-studio-border bg-studio-bg text-studio-text focus:outline-none focus:border-emerald-500/60 transition-all appearance-none"
             >
               {KEYS.map(k => <option key={k} value={k}>{k}</option>)}

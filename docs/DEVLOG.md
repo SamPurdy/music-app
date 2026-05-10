@@ -31,18 +31,18 @@
 
 ---
 
-## 2026-05-10 — Auto transpose chords on key change (fixed)
+## 2026-05-10 — Key dropdown transposition fix
 
 **Changed files:** `src/components/SongStructureBuilder.tsx`
 
 **What changed:**
-- Added new `baseKey` state to track the original key when song starts/loads
-- Modified `handleKeyChange()` to calculate transpose from baseKey instead of previous key
-- Updated `loadFromStorage()` to set `baseKey` to loaded song's key
-- Updated `saveSong()` to update `baseKey` after saving (no further transpose needed)
-- Key dropdown onChange now calls `handleKeyChange()` which transposes chords based on difference from baseKey
+- Fixed key dropdown onChange handler: changed `onChange={() => handleKeyChange(songKey)}` to `onChange={(e) => handleKeyChange(e.target.value)}`
 
-**Why:** When loading a saved song, the previous key tracking approach failed because there was no "previous" state. Now we track the base/original key separately and always calculate transpose from that baseline. This works correctly for new songs (baseKey='C') and loaded songs (baseKey=savedKey).
+**Why:** Previous code passed current `songKey` as the oldKey parameter, making diff always 0 and preventing any transpose. Now it correctly passes the newly selected key so diff is calculated properly.
+
+---
+
+## 2026-05-10 — Auto transpose chords on key change (fixed)
 
 
 **Changed files:** `src/components/PianoKeyboard.tsx`, `src/components/TheoryExplorer.tsx`
