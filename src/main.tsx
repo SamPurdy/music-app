@@ -1,0 +1,10 @@
+import '../src/lib/music-theory/notes'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App'
+
+const container = document.getElementById('root') as HTMLElement
+if (!container) throw new Error('Root not found')
+
+const root = createRoot(container)
+root.render(<App />)

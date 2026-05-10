@@ -1,0 +1,320 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom properties for consistent studio aesthetic */
+@layer base {
+  :root {
+    --studio-bg-primary: #0b0e14;
+    --studio-bg-secondary: #0d1119;
+    --studio-surface: #11151d;
+    --studio-surface-light: #131822;
+    --studio-border: rgba(255, 255, 255, 0.1);
+    --studio-border-hover: rgba(255, 255, 255, 0.15);
+    --studio-accent-primary: #38bdf8;
+    --studio-accent-glow: rgba(56, 189, 248, 0.3);
+    --studio-success: #22c55e;
+    --studio-warning: #f59e0b;
+    --studio-purple: #a78bfa;
+    --studio-indigo: #818cf8;
+  }
+
+  *, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  html {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  }
+
+  html, body, #root {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: var(--studio-bg-primary);
+    color: #e2e8f0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    letter-spacing: 0.3px;
+  }
+}
+
+/* Selection */
+::selection {
+  background: rgba(56, 189, 248, 0.25);
+  color: #e2e8f0;
+}
+
+code, kbd {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Glass morphism utilities */
+.studio-glass {
+  background: rgba(17, 21, 29, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.studio-glass-hover:hover {
+  background: rgba(17, 21, 29, 0.6);
+  border-color: rgba(255, 255, 255, 0.15);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Animated gradient backgrounds */
+@keyframes subtle-glow {
+  0%, 100% { opacity: 0.45; }
+  50% { opacity: 0.65; }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.8; }
+  100% { transform: scale(3); opacity: 0; }
+}
+
+/* Music studio themed glow effects */
+@layer components {
+  .studio-accent-glow {
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.15),
+                inset 0 0 30px rgba(56, 189, 248, 0.08);
+  }
+
+  .studio-border-gradient {
+    border: 1px solid transparent;
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.05) 0%, transparent 50%, rgba(56, 189, 248, 0.05) 100%);
+    background-size: 200% 200%;
+    animation: border-pulse 8s ease-in-out infinite;
+  }
+
+  @keyframes border-pulse {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+
+  .studio-card-gradient {
+    background: linear-gradient(180deg, rgba(17, 21, 29, 0.4) 0%, rgba(13, 17, 25, 0.3) 100%);
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3),
+                inset 0 -1px 0 rgba(255, 255, 255, 0.04);
+  }
+
+  .studio-button-gradient {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.1) 0%, rgba(56, 189, 248, 0.05) 100%);
+    border: 1px solid rgba(56, 189, 248, 0.2);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .studio-button-gradient:hover {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0.1) 100%);
+    border-color: rgba(56, 189, 248, 0.35);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+  }
+
+  .studio-input-glow:focus {
+    border-color: var(--studio-accent-primary) !important;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    outline: none;
+  }
+
+  .studio-badge-glow {
+    position: relative;
+  }
+
+  .studio-badge-glow::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(45deg, transparent, var(--studio-accent-glow), transparent);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0.7;
+  }
+
+  .studio-progress-bar {
+    background: linear-gradient(90deg, var(--studio-accent-primary) 0%, 
+                                    var(--studio-indigo) 50%, 
+                                    var(--studio-purple) 100%);
+  }
+
+  .studio-pulse-glow {
+    position: relative;
+  }
+
+  .studio-pulse-glow::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: inherit;
+    background: radial-gradient(circle at center, rgba(56, 189, 248, 0.3) 0%, transparent 70%);
+    opacity: 0;
+    animation: pulse-ring 2s ease-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes pulse-ring {
+    0% { opacity: 0; transform: scale(0.8); }
+    50% { opacity: 1; }
+    100% { opacity: 0; transform: scale(1.4); }
+  }
+}
+
+/* Custom scrollbar - refined for dark studio */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--studio-bg-primary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.3) 0%, rgba(129, 140, 248, 0.3) 100%);
+  border-radius: 4px;
+  border: 2px solid var(--studio-bg-primary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.5) 0%, rgba(129, 140, 248, 0.5) 100%);
+}
+
+/* Smooth transitions */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-duration: 150ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Text glow for important elements */
+.text-glow {
+  text-shadow: 0 0 20px rgba(56, 189, 248, 0.3);
+}
+
+.text-glow-fade {
+  text-shadow: 0 0 10px rgba(56, 189, 248, 0.15),
+                0 0 20px rgba(56, 189, 248, 0.08);
+}
+
+/* Selection */
+::selection {
+  background: rgba(56, 189, 248, 0.3);
+  color: #e2e8f0;
+}
+
+/* Decorative subtle gradient mesh overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: radial-gradient(ellipse at 20% 20%, var(--studio-accent-glow) 0px, transparent 50%),
+                    radial-gradient(ellipse at 80% 80%, rgba(167, 139, 250, 0.4) 0px, transparent 50%),
+                    radial-gradient(ellipse at 40% 60%, rgba(129, 140, 248, 0.3) 0px, transparent 40%);
+  opacity: 0.5;
+}
+
+/* Floating decorative particles */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background-image: repeating-linear-gradient(45deg, 
+    transparent 0px, 
+    transparent 30px,
+    rgba(56, 189, 248, 0.03) 30px,
+    rgba(56, 189, 248, 0.03) 31px
+  );
+}
+
+/* Music-specific styling */
+.chord-pill {
+  position: relative;
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.15) 0%, rgba(56, 189, 248, 0.08) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2),
+              inset 0 0 20px rgba(56, 189, 248, 0.1);
+}
+
+.chord-pill:hover {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.2) 0%, rgba(56, 189, 248, 0.12) 100%);
+  border-color: rgba(56, 189, 248, 0.5);
+  transform: translateY(-1px);
+}
+
+/* Section header styling for song structure */
+.section-header {
+  position: relative;
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 1rem;
+}
+
+.section-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 48%;
+  height: 1px;
+  background: linear-gradient(90deg, var(--studio-accent-primary), transparent);
+}
+
+/* Typography refinements */
+h1, h2, h3, h4, h5, h6 {
+  letter-spacing: -0.01em;
+  font-weight: 600;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+  line-height: 1.375rem;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+}
+
+/* Utility for subtle hover states */
+.hover-transition {
+  transition: all 150ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Fade animation */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.3s ease-out forwards;
+}

@@ -1,0 +1,39 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "model": "lmstudio/qwen/qwen3.5-9b",
+  "provider": {
+    "lmstudio": {
+      "models": {
+        "qwen": {
+           "id": "qwen/qwen3.5-9b",
+          "name": "Qwen 3.5 9B (local)",
+        },
+      },
+    },
+  },
+  "default_agent": "music-dev",
+  "username": "music-app-dev",
+  "compaction": {
+    "auto": true,
+    "prune": true
+  },
+  "permission": {
+    "bash": "allow",
+    "edit": {
+      "src/**": "allow",
+      "public/**": "allow",
+      "components/**": "allow",
+      "lib/**": "allow",
+      "types/**": "allow",
+      "styles/**": "allow",
+      "tests/**": "allow",
+      "*.json": "allow",
+      "*.md": "allow",
+      "*": "ask"
+    }
+  },
+  "skills": {
+    "paths": ["./.kilo/skills"]
+  },
+  "instructions": ["./AGENTS.md"]
+}
