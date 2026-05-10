@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Music2, Layers, Lightbulb, Circle, Zap } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
@@ -48,7 +48,7 @@ function App() {
           <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-studio-accent to-studio-purple flex items-center justify-center shadow-lg shadow-studio-accent/20">
             <Music2 size={14} className="text-white" strokeWidth={2.5} />
           </div>
-          <span className="text-sm font-bold tracking-tight text-studio-text">Kilo</span>
+          <span className="text-sm font-bold tracking-tight text-studio-text">Soundwave Studio</span>
           <span className="text-[10px] text-studio-muted font-medium bg-studio-surface px-1.5 py-0.5 rounded-md border border-studio-border">
             BETA
           </span>

@@ -1,14 +1,15 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Play, Shuffle, Download, Music2, Layers } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { generateMajorProgression, generateMinorProgression } from '@/lib/music-theory/progressions'
+import type { ChordQuality } from '@/types'
 
 const KEYS        = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const KEYS_LABEL  = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
 const LENGTHS     = [2, 4, 6, 8, 12, 16]
 
-type Quality = 'major' | 'minor' | 'diminished'
+type Quality = ChordQuality
 
 const QUALITY_STYLE: Record<Quality, { bg: string; border: string; text: string; roman: string }> = {
   major:      { bg: 'bg-sky-500/10',    border: 'border-sky-500/25',    text: 'text-sky-400',    roman: 'text-sky-400/70'    },

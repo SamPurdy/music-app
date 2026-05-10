@@ -1,15 +1,15 @@
-import React, { useState } from 'react'
+import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Music, Zap, Plus, Trash2, GripVertical } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 
 const SECTION_TYPES = {
-  intro:      { label: 'Intro',      color: 'bg-slate-500/15 text-slate-300 border-slate-500/30'   },
-  verse:      { label: 'Verse',      color: 'bg-blue-500/15  text-blue-300  border-blue-500/30'    },
-  pre_chorus: { label: 'Pre-Ch.',    color: 'bg-cyan-500/15  text-cyan-300  border-cyan-500/30'    },
-  chorus:     { label: 'Chorus',     color: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
-  bridge:     { label: 'Bridge',     color: 'bg-purple-500/15 text-purple-300 border-purple-500/30' },
-  outro:      { label: 'Outro',      color: 'bg-slate-500/15 text-slate-300 border-slate-500/30'   },
+  intro:       { label: 'Intro',    color: 'bg-slate-500/15 text-slate-300 border-slate-500/30'      },
+  verse:       { label: 'Verse',    color: 'bg-blue-500/15  text-blue-300  border-blue-500/30'       },
+  'pre-chorus':{ label: 'Pre-Ch.', color: 'bg-cyan-500/15  text-cyan-300  border-cyan-500/30'       },
+  chorus:      { label: 'Chorus',  color: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' },
+  bridge:      { label: 'Bridge',  color: 'bg-purple-500/15 text-purple-300 border-purple-500/30'   },
+  outro:       { label: 'Outro',   color: 'bg-slate-500/15 text-slate-300 border-slate-500/30'      },
 } as const
 
 type SectionType = keyof typeof SECTION_TYPES
@@ -22,18 +22,17 @@ interface Section {
 }
 
 const DEFAULT_SECTIONS: Section[] = [
-  { id: 1, name: 'Intro',    type: 'intro',   bars: 4  },
-  { id: 2, name: 'Verse 1',  type: 'verse',   bars: 8  },
-  { id: 3, name: 'Chorus',   type: 'chorus',  bars: 8  },
-  { id: 4, name: 'Verse 2',  type: 'verse',   bars: 8  },
-  { id: 5, name: 'Chorus',   type: 'chorus',  bars: 8  },
-  { id: 6, name: 'Bridge',   type: 'bridge',  bars: 8  },
-  { id: 7, name: 'Outro',    type: 'outro',   bars: 4  },
+  { id: 1, name: 'Intro',    type: 'intro',      bars: 4  },
+  { id: 2, name: 'Verse 1',  type: 'verse',      bars: 8  },
+  { id: 3, name: 'Chorus',   type: 'chorus',     bars: 8  },
+  { id: 4, name: 'Verse 2',  type: 'verse',      bars: 8  },
+  { id: 5, name: 'Chorus',   type: 'chorus',     bars: 8  },
+  { id: 6, name: 'Bridge',   type: 'bridge',     bars: 8  },
+  { id: 7, name: 'Outro',    type: 'outro',      bars: 4  },
 ]
 
-let nextId = 8
-
 export default function SongStructureBuilder() {
+  const nextIdRef = useRef(DEFAULT_SECTIONS.length + 1)
   const [songKey, setSongKey]   = useState('C')
   const [tempo, setTempo]       = useState(120)
   const [timeSig, setTimeSig]   = useState('4/4')
@@ -42,7 +41,7 @@ export default function SongStructureBuilder() {
 
   const addSection = (type: SectionType) => {
     const meta = SECTION_TYPES[type]
-    setSections(prev => [...prev, { id: nextId++, name: meta.label, type, bars: 8 }])
+    setSections(prev => [...prev, { id: nextIdRef.current++, name: meta.label, type, bars: 8 }])
   }
 
   const removeSection = (id: number) => {
@@ -91,7 +90,7 @@ export default function SongStructureBuilder() {
       {/* Section list */}
       <div className="space-y-2 max-h-[calc(100vh-460px)] overflow-y-auto pr-1">
         <AnimatePresence initial={false}>
-          {sections.map((section, index) => {
+          {sections.map((section) => {
             const meta = SECTION_TYPES[section.type]
             return (
               <motion.div key={section.id} layout initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 12 }} transition={{ duration: 0.2 }} className="group flex items-center gap-3 p-3 rounded-xl border border-studio-border bg-studio-surface hover:border-studio-border/80 hover:-translate-y-px transition-all">

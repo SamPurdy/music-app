@@ -1,4 +1,4 @@
-import type { Song } from '@/types'
+import type { Song, SongSection } from '@/types'
 import { v4 as uuidv4 } from 'uuid'
 
 const DEFAULT_TIME_SIGNATURE: [number, number] = [4, 4]
@@ -18,24 +18,20 @@ export function createSong(title: string, key: string, tempo: number = 120): Son
 }
 
 export function addSection(
-  song: Song, 
+  song: Song,
   sectionName: string,
-  sectionType: 'verse' | 'chorus' | 'bridge' | 'preChorus' | 'outro',
+  sectionType: SongSection['type'],
 ): Song {
-  if (song.sections.length === 0) return song
-  
-  // Simple append for now - no duplicate check yet
-  const newSection = {
+  const newSection: SongSection = {
+    id: uuidv4(),
     name: sectionName || 'Untitled',
-    type: sectionType || 'verse',
+    type: sectionType,
     repeats: 1,
     lyrics: [],
     tempo: song.tempo,
-    timeSignature: [song.timeSignature[0] || 4, song.timeSignature[1] || 4],
+    timeSignature: [song.timeSignature[0], song.timeSignature[1]],
     chords: undefined,
-    id: uuidv4(),
-  } as any
-  
+  }
   return {
     ...song,
     sections: [...song.sections, newSection],
@@ -44,20 +40,13 @@ export function addSection(
 }
 
 export function updateSection(
-  song: Song, 
-  sectionId: string, 
-  updates: any = {},
+  song: Song,
+  sectionId: string,
+  updates: Partial<SongSection>,
 ): Song {
-  const updatedSections = song.sections.map((s: any) => {
-    if (s.id === sectionId) {
-      return { ...s, ...updates }
-    }
-    return s
-  })
-  
   return {
     ...song,
-    sections: updatedSections,
+    sections: song.sections.map(s => s.id === sectionId ? { ...s, ...updates } : s),
     updatedAt: new Date(),
   }
 }
@@ -65,43 +54,28 @@ export function updateSection(
 export function removeSection(song: Song, sectionId: string): Song {
   return {
     ...song,
-    sections: song.sections.filter((s: any) => s.id !== sectionId),
+    sections: song.sections.filter(s => s.id !== sectionId),
     updatedAt: new Date(),
   }
 }
 
 export function moveSection(song: Song, sectionId: string, direction: 'up' | 'down'): Song {
-  const index = song.sections.findIndex((s: any) => s.id === sectionId)
-  
-  if (index === -1 || index < 0 || index >= song.sections.length - 1) return song
-  
+  const index = song.sections.findIndex(s => s.id === sectionId)
+  if (index === -1) return song
   const newIndex = direction === 'up' ? index - 1 : index + 1
   if (newIndex < 0 || newIndex >= song.sections.length) return song
-  
-  const newSections: any[] = [...song.sections, null] as any[]
-  const movedSection = newSections.splice(index, 1)[0]
-  newSections.splice(newIndex, 0, movedSection)
-  
-  return {
-    ...song,
-    sections: newSections.filter((s: any) => s !== null),
-    updatedAt: new Date(),
-  }
+  const newSections = [...song.sections]
+  const [moved] = newSections.splice(index, 1)
+  newSections.splice(newIndex, 0, moved!)
+  return { ...song, sections: newSections, updatedAt: new Date() }
 }
 
 export function getSongDuration(song: Song): number {
   let totalBeats = 0
-  
   for (const section of song.sections) {
-    const estimatedBars = (section.lyrics?.length || 4) 
-    const beatsPerMeasure = section.timeSignature?.[0] || 4
+    const estimatedBars = section.lyrics?.length || 4
+    const beatsPerMeasure = section.timeSignature?.[0] ?? 4
     totalBeats += estimatedBars * beatsPerMeasure * section.repeats
   }
-  
   return (totalBeats / song.tempo) * 60
-}
-
-export function getSuggestedKeyForVocalRange(): string[] {
-  const keys = ['C', 'D', 'E', 'F', 'G', 'A', 'B']
-  return keys.slice(1, 5)
 }

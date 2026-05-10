@@ -1,3 +1,5 @@
+export type ChordQuality = 'major' | 'minor' | 'diminished'
+
 export interface Note {
   name: string
   octave: number
@@ -6,7 +8,7 @@ export interface Note {
 
 export interface Chord {
   root: string
-  quality: string
+  quality: ChordQuality | string
   full: string
   notes: string[]
   intervals: number[]
@@ -16,7 +18,7 @@ export interface Chord {
 export interface ChordProgression {
   chords: Chord[]
   key: string
-  RomanNumeralAnalysis: string[]
+  romanNumeralAnalysis: string[]
 }
 
 export interface SongSection {

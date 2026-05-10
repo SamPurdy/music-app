@@ -32,15 +32,11 @@ export default {
         'fade-in-up': 'fade-in-up 0.3s ease-out forwards',
       },
       keyframes: {
-        spin_slow: {
-          from: { transform: 'rotate(0deg)' },
-          to: { transform: 'rotate(360deg)' },
-        },
-        pulse_ring: {
+        'pulse-ring': {
           '0%, 100%': { opacity: '0', transform: 'scale(0.8)' },
           '50%': { opacity: '1' },
         },
-        fade_in_up: {
+        'fade-in-up': {
           from: { opacity: '0', transform: 'translateY(8px) scale(0.98)' },
           to: { opacity: '1', transform: 'translateY(0) scale(1)' },
         },

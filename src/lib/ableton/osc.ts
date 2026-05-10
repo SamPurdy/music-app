@@ -1,20 +1,8 @@
-interface ChordData {
-  root: string
-  quality: string
-  full: string
-  notes: string[]
-}
-
-interface SongSection {
-  name: string
-  type?: string
-  tempo: number
-  repeats: number
-}
+import type { Chord, SongSection } from '@/types'
 
 interface OSCMessage {
   address: string
-  args: Array<{ type: string; value: any }>
+  args: Array<{ type: string; value: string | number }>
 }
 
 interface OSCClient {
@@ -26,19 +14,14 @@ interface OSCClient {
 let client: OSCClient | null = null
 
 export function initOSC(host: string = '127.0.0.1', port: number = 8000): void {
-  client = {
-    host,
-    port,
-    connected: false,
-  }
+  client = { host, port, connected: false }
 }
 
-export function sendChordToAbleton(chord: ChordData, trackIndex: number = 0): boolean {
+export function sendChordToAbleton(chord: Chord, trackIndex: number = 0): boolean {
   if (!client) {
     console.warn('OSC not initialized')
     return false
   }
-  
   const message: OSCMessage = {
     address: `/music/chord/${trackIndex}`,
     args: [
@@ -48,7 +31,6 @@ export function sendChordToAbleton(chord: ChordData, trackIndex: number = 0): bo
       { type: 'i', value: chord.notes.length },
     ],
   }
-  
   console.log('OSC send:', message)
   return true
 }
@@ -58,17 +40,15 @@ export function sendSectionData(section: SongSection, trackIndex: number = 0): b
     console.warn('OSC not initialized')
     return false
   }
-  
   const message: OSCMessage = {
     address: `/music/section/${trackIndex}`,
     args: [
       { type: 'str', value: section.name },
-      { type: 'str', value: section.type || '' },
+      { type: 'str', value: section.type },
       { type: 'i', value: section.tempo },
       { type: 'i', value: section.repeats },
     ],
   }
-  
   console.log('OSC send:', message)
   return true
 }
@@ -78,7 +58,6 @@ export function sendTransportState(beat: number, bar: number, isPlaying: boolean
     console.warn('OSC not initialized')
     return false
   }
-  
   const message: OSCMessage = {
     address: '/music/transport',
     args: [
@@ -87,14 +66,13 @@ export function sendTransportState(beat: number, bar: number, isPlaying: boolean
       { type: 'i', value: isPlaying ? 1 : 0 },
     ],
   }
-  
   console.log('OSC send:', message)
   return true
 }
 
 export function connectOSC(port?: number): boolean {
   if (!client) return false
-  client.port = port || client.port!
+  if (port !== undefined) client.port = port
   client.connected = true
   console.log(`OSC connected to ${client.host}:${client.port}`)
   return true

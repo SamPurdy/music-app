@@ -1,5 +1,5 @@
 import * as Tonal from 'tonal'
-import type { Chord } from '@/types'
+import type { Chord, CreativeSuggestion } from '@/types'
 
 type Quality = 'major' | 'minor' | 'diminished'
 
@@ -85,7 +85,7 @@ export function generateMinorProgression(key: string, length: number = 4) {
   return { chords, key, scaleNotes: notes }
 }
 
-export function analyzeProgression(chordNames: string[], key: string) {
+export function analyzeProgression(chordNames: string[], key: string): { analysis: string[] } {
   const scale = Tonal.Scale.get(`${key} major`)
   const notes = scale.notes
 
@@ -100,14 +100,7 @@ export function analyzeProgression(chordNames: string[], key: string) {
   return { analysis }
 }
 
-export interface ProgressionSuggestion {
-  type: 'chord' | 'melody' | 'structure' | 'rhythm'
-  content: string
-  context: string
-  confidence: number
-}
-
-const PROGRESSION_LIBRARY: Record<string, ProgressionSuggestion[]> = {
+const PROGRESSION_LIBRARY: Record<string, CreativeSuggestion[]> = {
   pop: [
     { type: 'chord', content: 'I – V – vi – IV', context: 'Most popular progression in modern pop music', confidence: 0.95 },
     { type: 'chord', content: 'I – IV – V – I', context: 'Classic resolved cadence — timeless and satisfying', confidence: 0.88 },
@@ -146,18 +139,9 @@ const PROGRESSION_LIBRARY: Record<string, ProgressionSuggestion[]> = {
   ],
 }
 
-export function suggestProgressions(key: string, style: string = 'pop'): ProgressionSuggestion[] {
+export function suggestProgressions(key: string, style: string = 'pop'): CreativeSuggestion[] {
   const suggestions = PROGRESSION_LIBRARY[style] ?? PROGRESSION_LIBRARY.pop!
   return suggestions.map((p) => ({ ...p, context: `In ${key}: ${p.context}` }))
-}
-
-export function getScaleNotes(scaleName: string = 'C major') {
-  try {
-    const scale = Tonal.Scale.get(scaleName)
-    return { notes: scale.notes }
-  } catch {
-    return { notes: [] as string[] }
-  }
 }
 
 export default {
@@ -165,6 +149,5 @@ export default {
   generateMinorProgression,
   analyzeProgression,
   suggestProgressions,
-  getScaleNotes,
 }
 
