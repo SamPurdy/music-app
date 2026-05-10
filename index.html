@@ -18,6 +18,47 @@
   </head>
   <body class="bg-[#0b0e14] text-[#e2e8f0]" style="margin: 0; padding: 0;">
     <div id="root"></div>
+
+    <!--
+      Dev-only: capture unhandled JS errors and promise rejections that occur
+      *outside* React's render cycle (e.g. in event handlers or async callbacks)
+      and show them as a visible toast so the local model can spot them without
+      opening DevTools. Removed automatically in production by the minifier.
+    -->
+    <script>
+      (function () {
+        if (!['localhost', '127.0.0.1', '::1'].includes(location.hostname)) return;
+
+        function showToast(msg) {
+          var el = document.getElementById('__dev-error-toast');
+          if (!el) {
+            el = document.createElement('div');
+            el.id = '__dev-error-toast';
+            Object.assign(el.style, {
+              position: 'fixed', bottom: '1rem', right: '1rem', zIndex: '99999',
+              background: '#1c0a0a', border: '1px solid #7f1d1d', borderRadius: '8px',
+              color: '#fca5a5', fontFamily: 'monospace', fontSize: '0.8rem',
+              padding: '0.75rem 1rem', maxWidth: '500px', whiteSpace: 'pre-wrap',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.6)', cursor: 'pointer',
+            });
+            el.title = 'Click to dismiss';
+            el.onclick = function () { el.remove(); };
+            document.body.appendChild(el);
+          }
+          el.textContent = '⚠ Runtime Error\n' + msg;
+        }
+
+        window.addEventListener('error', function (e) {
+          showToast((e.message || String(e)) + '\n' + (e.filename ? e.filename + ':' + e.lineno : ''));
+        });
+
+        window.addEventListener('unhandledrejection', function (e) {
+          var reason = e.reason;
+          showToast((reason && reason.message ? reason.message : String(reason)));
+        });
+      })();
+    </script>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

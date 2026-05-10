@@ -4,6 +4,21 @@
 
 ---
 
+## 2026-05-10 — Local model debug tooling & Safe Edit Protocol
+
+**Changed files:** `src/components/DevErrorBoundary.tsx` (new), `src/main.tsx`, `index.html`, `src/vite-env.d.ts` (new), `package.json`, `.github/instructions/codebase.instructions.md`
+
+**What changed:**
+- Added `DevErrorBoundary` class component — wraps app in dev mode only, shows full-screen error panel with stack trace and component stack when a React render error occurs
+- Added `window.onerror` / `unhandledrejection` toast overlay in `index.html` — catches runtime JS errors outside React and shows a visible badge in the bottom-right corner (dev/localhost only)
+- Added `npm run dev:log` script — pipes dev server output (including HMR errors) to `dev.log` so the model can inspect it with `tail dev.log`
+- Created `src/vite-env.d.ts` with Vite client types reference (was missing; fixes `import.meta.env` TypeScript errors)
+- Expanded `codebase.instructions.md` with the **Safe Edit Protocol**: read → state intent → minimal change → verify → check import chain; added "UI changes not appearing" debugging checklist
+
+**Why:** Local model often makes changes that silently fail (TypeScript error, wrong file, missing import) with no visible feedback. These tools make failures visible on-screen so the model can iterate without DevTools access.
+
+---
+
 ## 2026-05-10 — Disable auto-push in AGENTS.md
 
 **Changed files:** `AGENTS.md`

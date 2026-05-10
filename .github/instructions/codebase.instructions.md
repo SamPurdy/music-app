@@ -40,8 +40,25 @@ White keys: [0,2,4,5,7,9,11] | Black keys: [1,3,6,8,10]
 4. **DO NOT commit or push** — show the user a list of changed files and wait for their approval
 
 ## Workflow Rules for Local Model
-- **Read the target file before editing it** — never edit blindly from memory
+
+### ✋ Safe Edit Protocol — ALWAYS follow before touching any file
+
+1. **Read first.** Before editing, view the exact function/block you intend to change and paste the relevant section in your analysis. Never edit from memory.
+2. **State your intent.** Describe which lines will change and why. If you can't pinpoint specific lines, read the file again.
+3. **Minimal change only.** Replace only the specific code that needs changing — do NOT rewrite surrounding code, functions, or imports that are not part of the task.
+4. **Verify after.** Re-read the edited section to confirm the change looks correct and no surrounding code was lost.
+5. **Check the import chain.** After adding/moving a component, verify it is actually imported and rendered where expected (trace from `App.tsx` down to the component).
+
+### General Rules
 - **One file at a time** — complete and verify one change before moving to the next
-- **When unsure about an interface or function signature** — check `src/types/index.ts` or the relevant lib file
+- **When unsure about a type or function signature** — check `src/types/index.ts` or the relevant lib file first
 - **If the task is large** — ask the user to break it into smaller steps rather than attempting everything in one response
 - **Context getting long?** — suggest running `/handoff` and starting a fresh session
+
+### Debugging UI Changes That Don't Appear
+If a change is made but nothing visibly changes in the browser:
+1. Check the browser for an on-screen error toast or the full-screen Error Boundary — it means a runtime/render error occurred
+2. Run `npm run build` — TypeScript errors are the #1 silent cause of UI changes not appearing
+3. Confirm the edited component is actually imported and rendered in the current tab's component tree (check `App.tsx` and the relevant tab component)
+4. Check `dev.log` (created by `npm run dev:log`) for HMR errors or module resolution failures
+
