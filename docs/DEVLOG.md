@@ -36,11 +36,13 @@
 **Changed files:** `src/components/SongStructureBuilder.tsx`
 
 **What changed:**
-- Simplified auto-transpose logic: removed nested useEffect, now uses synchronous `handleKeyChange()` function
-- Key dropdown onChange calls `handleKeyChange(songKey)` which calculates semitone difference and transposes all chords
-- Chords automatically update when you select a different key from the dropdown
+- Added new `baseKey` state to track the original key when song starts/loads
+- Modified `handleKeyChange()` to calculate transpose from baseKey instead of previous key
+- Updated `loadFromStorage()` to set `baseKey` to loaded song's key
+- Updated `saveSong()` to update `baseKey` after saving (no further transpose needed)
+- Key dropdown onChange now calls `handleKeyChange()` which transposes chords based on difference from baseKey
 
-**Why:** Initial implementation violated React's Rules of Hooks by calling useRef inside useEffect. Fixed with simpler synchronous approach.
+**Why:** When loading a saved song, the previous key tracking approach failed because there was no "previous" state. Now we track the base/original key separately and always calculate transpose from that baseline. This works correctly for new songs (baseKey='C') and loaded songs (baseKey=savedKey).
 
 
 **Changed files:** `src/components/PianoKeyboard.tsx`, `src/components/TheoryExplorer.tsx`
