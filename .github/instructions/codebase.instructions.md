@@ -30,6 +30,19 @@ White keys: [0,2,4,5,7,9,11] | Black keys: [1,3,6,8,10]
 | All TS types | `src/types/index.ts` |
 | Design tokens | `tailwind.config.js` |
 
+## Context Cards — Read Before Editing a Component
+Each card has props, state shape, key behaviors, and watch-outs for that component.
+**Read the card before reading the source file** — it's much smaller.
+
+| Component file | Context card |
+|---|---|
+| `ChordProgressionDisplay.tsx` | `docs/context/chord-progression.md` |
+| `CreativeInspiration.tsx` | `docs/context/inspiration.md` |
+| `GuitarLab.tsx` + `GuitarChordDiagram.tsx` + `GuitarFretboard.tsx` | `docs/context/guitar-lab.md` |
+| `SongStructureBuilder.tsx` | `docs/context/song-builder.md` |
+| `TheoryExplorer.tsx` + `PianoKeyboard.tsx` | `docs/context/theory-explorer.md` |
+| Song/suggestion JSON schemas | `docs/context/schemas.md` |
+
 ## Color Tokens
 `studio-bg` `studio-surface` `studio-surface-2` `studio-border` `studio-text` `studio-muted` `studio-accent`(sky) `studio-success`(green) `studio-purple` `studio-pink`
 

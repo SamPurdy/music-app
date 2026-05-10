@@ -6,6 +6,16 @@
 ## Stack
 React 19 + TS + Vite + Tailwind CSS + Tone.js + Tonal.js. No backend. Port 5173.
 
+## Context Cards (read before editing a component)
+| Component | Card |
+|---|---|
+| ChordProgressionDisplay | `docs/context/chord-progression.md` |
+| CreativeInspiration | `docs/context/inspiration.md` |
+| GuitarLab + ChordDiagram + Fretboard | `docs/context/guitar-lab.md` |
+| SongStructureBuilder | `docs/context/song-builder.md` |
+| TheoryExplorer + PianoKeyboard | `docs/context/theory-explorer.md` |
+| JSON schemas | `docs/context/schemas.md` |
+
 ## Tabs → Components
 - song → `SongStructureBuilder.tsx`
 - chords → `ChordProgressionDisplay.tsx`

@@ -4,7 +4,21 @@
 
 ---
 
-## 2026-05-10 — Local model debug tooling & Safe Edit Protocol
+## 2026-05-10 — Add per-component context cards
+
+**Changed files:** `docs/context/chord-progression.md` (new), `docs/context/guitar-lab.md`, `.github/instructions/codebase.instructions.md`, `docs/QUICK_REF.md`
+
+**What changed:**
+- Created `docs/context/chord-progression.md` — full context card for `ChordProgressionDisplay.tsx` covering state, progression shape, audio playback pattern, quality styles, and watch-outs
+- Expanded `docs/context/guitar-lab.md` — added dedicated sub-sections for `GuitarChordDiagram.tsx` (props, size table, visual encoding, string numbering) and `GuitarFretboard.tsx` (props, tuning constants, dot colors, note calculation, audio on click)
+- Added **Context Cards** table to `codebase.instructions.md` — maps every component file to its card so the local model knows exactly which doc to read before touching a component
+- Added same table to `docs/QUICK_REF.md` for mid-session reference
+
+**Why:** Local model was reading full 300–400 line component files when a 50-line card is enough. Cards reduce context usage by ~80% per component and highlight the specific gotchas that cause bugs.
+
+---
+
+
 
 **Changed files:** `src/components/DevErrorBoundary.tsx` (new), `src/main.tsx`, `index.html`, `src/vite-env.d.ts` (new), `package.json`, `.github/instructions/codebase.instructions.md`
 
