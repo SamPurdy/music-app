@@ -57,4 +57,4 @@ docs/
 - `twMerge` for all conditional Tailwind class merging
 - Music theory calcs only in `src/lib/music-theory/`
 - Audio playback only via `src/lib/audio/synth.ts`
-- After changes: append entry to `docs/DEVLOG.md`, then commit + push
+- After changes: append entry to `docs/DEVLOG.md`, then commit (no auto-push)

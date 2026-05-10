@@ -4,6 +4,17 @@
 
 ---
 
+## 2026-05-10 — Disable auto-push in AGENTS.md
+
+**Changed files:** `AGENTS.md`
+
+**What changed:**
+- Updated convention from "After changes: append entry to `docs/DEVLOG.md`, then commit + push" to "After changes: append entry to `docs/DEVLOG.md`, then commit (no auto-push)"
+
+**Why:** Auto-push behavior was unwanted. Agents should now commit changes locally and wait for manual push by user.
+
+---
+
 ## Entry Template
 ```
 ## YYYY-MM-DD — [Brief title]
