@@ -24,55 +24,37 @@
 ---
 
 ## Project Overview
-Music and songwriting application with built-in music theory, creative inspiration tools, and Ableton integration.
+**Soundwave Studio** — Professional music theory and songwriting web app.
+React 19 + TypeScript + Vite + Tailwind CSS + Tone.js + Tonal.js.
 
-## Tech Stack
-- **Frontend**: React + TypeScript (or Electron for desktop)
-- **Backend**: Node.js or Python (for music theory engine)
-- **Music Theory**: `tonal` (JS) / `music21` (Python)
-- **MIDI**: `@tonejs/midi`, `midi-js`
-- **Ableton Integration**: Ableton Link, OSC bridge, MIDI export
+> **📖 For codebase context, read `ARCHITECTURE.md` first.**
+> **📝 For recent changes, read `docs/DEVLOG.md`.**
+> **🚀 To start a session, use the `/start-session` prompt.**
 
 ## Project Structure
 ```
 src/
-  components/     # React UI components
-  lib/            # Music theory engine, utilities
-  types/          # TypeScript types
-  music-theory/   # Core theory analysis
-  midi/           # MIDI generation/export
-  ableton/        # Ableton integration (Link, OSC)
-  songwriting/    # Lyric/chord workflow tools
-  hooks/          # Custom React hooks
-tests/
-public/
+  App.tsx                         # Tab shell (song/chords/inspiration/theory/guitar)
+  components/                     # React UI components
+  lib/
+    audio/synth.ts                # Tone.js audio playback
+    music-theory/                 # scales, intervals, notes, progressions, voice-leading
+    guitar/chords.ts              # Guitar voicings + transposeChord()
+    songwriting/song.ts           # Song/section CRUD
+    midi/export.ts                # MIDI generation
+    ableton/                      # Link sync + OSC (optional integration)
+  types/index.ts                  # All TypeScript interfaces
+docs/
+  DEVLOG.md                       # Running change log — UPDATE after each session
+.github/
+  instructions/codebase.instructions.md  # Auto-injected coding context
+  prompts/start-session.prompt.md        # /start-session slash command
 ```
 
-## Key Domains
-
-### Music Theory
-- Chord scales, modes, progressions
-- Roman numeral analysis
-- Voice leading, harmonic tension
-- Chord substitutions and extensions
-
-### Songwriting
-- Song structure (verse, chorus, bridge, etc.)
-- Lyrics with chord overlays
-- Tempo, key, time signature
-- Creative generation (AI-assisted)
-
-### Ableton Integration
-- MIDI clip export
-- Ableton Link sync
-- OSC communication
-- Max for Live companion device
-
 ## Conventions
-- Use functional components with hooks
-- Type all interfaces explicitly
-- Music theory calculations in `lib/music-theory/`
-- MIDI generation in `lib/midi/`
-- Ableton integration in `lib/ableton/`
-- Tests for all music theory logic
-- No hardcoded frequencies — derive from note data
+- Functional components with hooks only — no class components
+- All interfaces explicitly typed — no `any`
+- `twMerge` for all conditional Tailwind class merging
+- Music theory calcs only in `src/lib/music-theory/`
+- Audio playback only via `src/lib/audio/synth.ts`
+- After changes: append entry to `docs/DEVLOG.md`, then commit + push
