@@ -23,8 +23,15 @@ Read the top of `docs/DEVLOG.md` — recent changes (top 2–3 entries only).
 Read `ARCHITECTURE.md` only if you need deeper reference (component props, lib exports, etc). For routine tasks, HANDOFF + TODOS + DEVLOG is enough.
 
 ### Step 5 — Check build health
-Run: `npm run build 2>&1 | tail -20`
-Report any TypeScript or build errors before proceeding.
+Run the build and check for errors. Use whichever works in your shell:
+```bash
+# Git Bash:
+npm run build 2>&1 | tail -20
+
+# PowerShell / Windows fallback:
+npm run build 2>&1 | Select-Object -Last 20
+```
+Report any TypeScript or build errors before proceeding. A clean build ends with `✓ built in X.XXs`.
 
 ### Step 6 — Suggest next steps
 Synthesize everything you've read into a suggested task list. Present it as a short numbered menu:

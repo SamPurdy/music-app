@@ -43,6 +43,15 @@
 
 ---
 
+## ⏸ Deferred
+
+<!-- Items the user decided to skip for now. Not deleted — can be revived later. -->
+
+<!-- Example: -->
+<!-- - [ ] Dark/light mode toggle — deferred 2026-05-10, too much effort for now -->
+
+---
+
 ## ✅ Completed
 
 <!-- Move items here when done, with date -->
@@ -57,15 +66,17 @@
 
 ---
 
-## How to Add a Todo
+## How to Manage Todos
 
-Add a line in the appropriate section:
-```
-- [ ] Brief description of the task (component or file if known)
-```
+**Quick commands** (use `/todo` in Kilo):
+- `/todo` — view open items
+- `/todo add [high|medium|low] description` — add a new todo
+- `/todo done description` — mark done and move to ✅ Completed
+- `/todo defer description` — move to ⏸ Deferred (decided not to do now)
 
-To mark done when implemented:
+**Manual format:**
 ```
-- [x] 2026-05-10 — Brief description
+- [ ] Brief description (component or file if known)   ← open
+- [x] 2026-05-10 — Brief description                  ← done (move to ✅)
 ```
-Then move it to the ✅ Completed section.
+Never delete a todo — only mark done or defer it.
