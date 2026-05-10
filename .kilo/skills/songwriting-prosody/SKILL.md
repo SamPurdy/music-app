@@ -1,39 +1,47 @@
 # Skill: Songwriting & Prosody
-**Description:** Use this skill when generating lyrics, analyzing song structure, or matching lyrical stress patterns to musical beats.
+**Description:** Use this skill when generating lyrics, analyzing song structure, matching lyrical stress patterns to musical beats, or working with the SongStructureBuilder component.
 
 ---
 
 ## Instructions
-Use this skill to ensure lyrical content aligns with the musicality, rhythm, and emotional intent of the track.
 
-### 1. Song Structures
-When suggesting structural changes or organizing the UI, reference these standard forms:
-*   **AABA (Thirty-Two-Bar Form):** Verse-Verse-Bridge-Verse. Common in jazz and early pop.
-*   **Verse-Chorus:** V1-C-V2-C-Bridge-C. The modern standard.
-*   **Through-composed:** Continuous movement without repeating sections; often used in progressive or narrative styles.
+### 1. SongStructureBuilder Context
+Song sections in the app (`src/components/SongStructureBuilder.tsx`) each have:
+- `name`: string (Verse, Chorus, Bridge, etc.)
+- `chords`: string[] (e.g., `["Am", "F", "C", "G"]`)
+- `lyrics`: string (freeform text aligned with chords)
+- Sections can be reordered by drag-and-drop
+- Song is saved as JSON to `public/songs/`
 
-### 2. Prosody & Rhythm
-Match word stresses to the time signature (typically 4/4). Ensure accented syllables land on the "downbeats" (Beat 1 or 3):
-*   **Iambic (Short-Long):** "The **HEART** is **BEAT**-ing **FAST**." (Great for steady folk/rock).
-*   **Trochaic (Long-Short):** "**DOU**-ble, **DOU**-ble, **TOIL** and **TROU**-ble." (Good for driving, urgent rhythms).
-*   **Dactylic (Long-Short-Short):** "**HICK**-o-ry, **DICK**-o-ry, **DOCK**." (Waltz-time / 3/4 feel).
+### 2. Standard Song Structures
+- **Verse-Chorus:** V1-C-V2-C-Bridge-C — the modern pop/rock standard
+- **AABA:** Verse-Verse-Bridge-Verse — jazz/early pop standard
+- **Through-composed:** No repeating sections — progressive/narrative styles
 
-### 3. Local LLM Synergy (Qwen/DeepSeek)
-When prompting the local model for creative writing, always include the **Mood**, **Key**, and **Rhyme Scheme** to keep the output grounded:
-*   *Prompt Template:* "Generate 4 lines of lyrics in [Key] Major, with a [Mood] vibe, following an [AABB/ABAB] rhyme scheme. Ensure the meter is [Iambic/Trochaic]."
+### 3. Prosody & Rhythm
+Match word stresses to the time signature (4/4 default). Accented syllables should land on beats 1 or 3:
+- **Iambic (Short-Long):** "The HEART is BEAT-ing FAST" — steady folk/rock
+- **Trochaic (Long-Short):** "DOU-ble, TOIL and TROU-ble" — driving, urgent rhythms
+- **Dactylic (Long-Short-Short):** "HICK-o-ry DICK-o-ry DOCK" — 3/4 waltz feel
 
 ### 4. Emotional Tone Mapping
-Use these heuristics to suggest musical backdrops for specific lyrical themes:
-| Mode | Character | Suggested Lyrical Theme |
-| :--- | :--- | :--- |
-| **Lydian** | Ethereal, Dreamy | Wonder, Space, Transcendence |
-| **Dorian** | Sophisticated, Soulful | Bittersweet memories, Urban life |
-| **Phrygian** | Tense, Dark, Exotic | Conflict, Mystery, Anxiety |
-| **Mixolydian** | Bright, Bluesy, Gritty | Freedom, Road trips, Classic Rock |
+| Mode | Character | Lyrical Theme |
+|------|-----------|---------------|
+| Lydian | Ethereal, Dreamy | Wonder, space, transcendence |
+| Dorian | Sophisticated, Soulful | Bittersweet memories, urban life |
+| Phrygian | Tense, Dark, Exotic | Conflict, mystery, anxiety |
+| Mixolydian | Bright, Bluesy | Freedom, road trips, classic rock |
+| Aeolian (Natural Minor) | Melancholic | Loss, nostalgia, longing |
+
+### 5. Section Transition Tips
+- **Verse → Pre-Chorus**: Increase harmonic rhythm (more chord changes per bar)
+- **Pre-Chorus → Chorus**: Land on V chord before the chorus for maximum lift
+- **Chorus → Bridge**: Drop to a more sparse arrangement to create contrast
+- **Bridge → Final Chorus**: Build energy back up, consider key change (+1 or +2 semitones)
 
 ---
 
-## Implementation Guidelines
-*   **Inspiration, Not Replacement:** Provide options and prompts rather than writing the whole song for the user.
-*   **Section Transitions:** Suggest musical "lifts" when transitioning from Verse to Chorus (e.g., adding a pre-chorus or increasing harmonic rhythm).
-*   **Syllable Counting:** Assist the user in balancing line lengths to ensure they fit within a standard 4-bar or 8-bar MIDI phrase.
+## Guidelines
+- **Inspiration, Not Replacement**: Give options and prompts — don't write the whole song
+- **Section Transitions**: Suggest musical "lifts" with chord suggestions
+- **Syllable Matching**: Help balance line lengths to fit 4-bar or 8-bar phrases
