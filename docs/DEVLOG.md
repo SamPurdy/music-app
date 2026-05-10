@@ -31,7 +31,17 @@
 
 ---
 
-## 2026-05-10 — Piano keyboard highlighting overhaul + size increase
+## 2026-05-10 — Auto transpose chords on key change (fixed)
+
+**Changed files:** `src/components/SongStructureBuilder.tsx`
+
+**What changed:**
+- Simplified auto-transpose logic: removed nested useEffect, now uses synchronous `handleKeyChange()` function
+- Key dropdown onChange calls `handleKeyChange(songKey)` which calculates semitone difference and transposes all chords
+- Chords automatically update when you select a different key from the dropdown
+
+**Why:** Initial implementation violated React's Rules of Hooks by calling useRef inside useEffect. Fixed with simpler synchronous approach.
+
 
 **Changed files:** `src/components/PianoKeyboard.tsx`, `src/components/TheoryExplorer.tsx`
 

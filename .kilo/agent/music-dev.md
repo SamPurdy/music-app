@@ -56,4 +56,4 @@ src/lib/
 ### After Changes
 1. Run `npm run build` to verify no TypeScript errors
 2. Append an entry to `docs/DEVLOG.md`
-3. `git add -A && git commit -m "description" && git push`
+3. **DO NOT auto-commit/push** — wait for user confirmation before committing and pushing changes
