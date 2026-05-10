@@ -1,25 +1,39 @@
 ---
 name: start-session
-description: "Load project context for a new coding session. Run this at the start of every session to orient yourself on the codebase state."
+description: "Load project context for a new coding session on Soundwave Studio. Run this at the start of every session."
 ---
 
 # Session Start — Soundwave Studio
 
-You are working on **Soundwave Studio**, a professional music theory and songwriting web app.
+You are working on **Soundwave Studio** — a professional music theory and songwriting web app (React 19 + TypeScript + Vite + Tailwind CSS + Tone.js). No backend. Dev server: `npm run dev` → http://localhost:5173.
 
-## Step 1: Read architecture reference
-Read `ARCHITECTURE.md` in the project root. This is your primary codebase map — component props, lib exports, data flow, and common pitfalls.
+## Context Load Sequence (read in this order to save context window)
 
-## Step 2: Check recent changes
-Read `docs/DEVLOG.md` (top entries only). This tells you what changed in recent sessions so you don't repeat work or break recent fixes.
+### Step 1 — Read handoff (tiny, ~200 words)
+Read `docs/HANDOFF.md` — this tells you exactly what was done last session and what comes next.
 
-## Step 3: Confirm current state
-Run `npm run build 2>&1 | tail -20` to verify the project currently builds clean. Report any errors before proceeding.
+### Step 2 — Read recent DEVLOG entries (top 2–3 only)
+Read the top of `docs/DEVLOG.md` — recent changes you need to know about. Stop after 3 entries.
 
-## Step 4: Understand the task
-Ask the user what they want to work on today. Reference `ARCHITECTURE.md` to identify which files are relevant before touching anything.
+### Step 3 — Read full architecture only if needed
+Read `ARCHITECTURE.md` only if you need deeper reference (component props, lib exports, etc). For routine tasks, the HANDOFF + DEVLOG is enough.
 
-## Step 5: After completing changes
-- Verify the build still passes: `npm run build`
-- Append a new entry at the TOP of `docs/DEVLOG.md` summarizing what you changed and why
-- Commit: `git add -A && git commit -m "description" && git push`
+### Step 4 — Check build health
+Run: `npm run build 2>&1 | tail -20`
+Report any TypeScript or build errors before proceeding.
+
+### Step 5 — Understand the task
+Ask the user what they want to work on. Look up only the relevant source file(s) for that task — don't pre-read everything.
+
+---
+
+## Mid-Session Context Saving
+If you feel your context is getting long, ask the user if they want you to `/handoff` and start fresh. This preserves progress without losing state.
+
+---
+
+## End-of-Session Checklist
+1. Run `npm run build` — verify no errors
+2. Update `docs/HANDOFF.md` with current state and next steps
+3. Append entry to top of `docs/DEVLOG.md`
+4. Commit: `git add -A && git commit -m "description"` (no auto-push)
