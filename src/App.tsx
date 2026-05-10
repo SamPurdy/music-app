@@ -1,19 +1,23 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Music2, Layers, Lightbulb, Circle, Zap } from 'lucide-react'
+import { Music2, Layers, Lightbulb, BookOpen, Guitar, Circle, Zap } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import clsx from 'clsx'
 import ChordProgressionDisplay from './components/ChordProgressionDisplay'
 import SongStructureBuilder from './components/SongStructureBuilder'
 import CreativeInspiration from './components/CreativeInspiration'
+import TheoryExplorer from './components/TheoryExplorer'
+import GuitarLab from './components/GuitarLab'
 
-type Tab = 'song' | 'chords' | 'inspiration'
+type Tab = 'song' | 'chords' | 'inspiration' | 'theory' | 'guitar'
 type MidiStatus = 'idle' | 'connecting' | 'connected' | 'recording'
 
 const TABS: { id: Tab; label: string; Icon: React.ElementType }[] = [
   { id: 'song',        label: 'Song',        Icon: Music2    },
   { id: 'chords',      label: 'Chord Lab',   Icon: Layers    },
   { id: 'inspiration', label: 'Inspiration', Icon: Lightbulb },
+  { id: 'theory',      label: 'Theory',      Icon: BookOpen  },
+  { id: 'guitar',      label: 'Guitar Lab',  Icon: Guitar    },
 ]
 
 const HARMONIC_CONTEXT = [
@@ -154,6 +158,8 @@ function App() {
                   {id === 'song'        && <SongStructureBuilder />}
                   {id === 'chords'      && <ChordProgressionDisplay />}
                   {id === 'inspiration' && <CreativeInspiration />}
+                  {id === 'theory'      && <TheoryExplorer />}
+                  {id === 'guitar'      && <GuitarLab />}
                 </motion.div>
               ) : null
             )}
