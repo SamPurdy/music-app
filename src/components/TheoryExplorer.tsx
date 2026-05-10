@@ -118,18 +118,26 @@ export default function TheoryExplorer() {
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-3">
         <p className="text-[10px] uppercase tracking-widest text-studio-muted">Piano — {root} {scale?.name}</p>
         <PianoKeyboard
-          highlightedNotes={noteIndices}
+          scaleNotes={noteIndices.filter(n => n !== rootIdx)}
           rootNote={rootIdx === -1 ? undefined : rootIdx}
           label={`${noteNames.length} notes highlighted · root in sky blue`}
         />
-        <div className="flex gap-4 pt-1">
+        <div className="flex gap-4 pt-1 flex-wrap">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-studio-accent" />
+            <div className="w-3 h-3 rounded-sm bg-sky-400" />
             <span className="text-[10px] text-studio-muted">Root note</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-studio-accent/30 border border-studio-accent/60" />
+            <div className="w-3 h-3 rounded-sm bg-violet-400/50 border border-violet-400" />
             <span className="text-[10px] text-studio-muted">Scale notes</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-white border border-gray-300" />
+            <span className="text-[10px] text-studio-muted">Not in scale (white key)</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-3 h-3 rounded-sm bg-gray-600" />
+            <span className="text-[10px] text-studio-muted">Not in scale (black key)</span>
           </div>
         </div>
       </div>

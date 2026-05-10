@@ -2,97 +2,103 @@ import { twMerge } from 'tailwind-merge'
 import { playPianoNote } from '@/lib/audio/synth'
 
 interface PianoKeyboardProps {
-  highlightedNotes?: number[]
+  /** Note indices (0-11) in the scale, NOT including the root */
+  scaleNotes?: number[]
+  /** Single note index (0-11) for the root */
   rootNote?: number
   onNoteClick?: (noteIndex: number) => void
   label?: string
 }
 
-const WHITE_INDICES = [0, 2, 4, 5, 7, 9, 11]   // C D E F G A B
+const WHITE_INDICES = [0, 2, 4, 5, 7, 9, 11]
 const NOTE_NAMES_12 = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
+const BLACK_NOTE_INDICES = [1, 3, 6, 8, 10]
 
-const WHITE_W = 34
-const WHITE_H = 110
-const BLACK_W = 22
-const BLACK_H = 68
-const OCTAVE_W = WHITE_W * 7  // 238
+const WHITE_W = 52
+const WHITE_H = 165
+const BLACK_W = 33
+const BLACK_H = 104
+const OCTAVE_W = WHITE_W * 7
 
-// Black key x offsets within one octave (5 black keys)
-const BLACK_X_OFFSETS = [23, 57, 125, 159, 193]
-const BLACK_NOTE_INDICES = [1, 3, 6, 8, 10]  // C# D# F# G# A#
+// Black key x positions for WHITE_W=52
+const BLACK_X_OFFSETS = [35, 87, 191, 243, 295]
 
-export default function PianoKeyboard({ highlightedNotes = [], rootNote, onNoteClick, label }: PianoKeyboardProps) {
-  const totalWhiteKeys = 15  // 7+7+1 (C4 through C6)
-  const totalWidth = totalWhiteKeys * WHITE_W
+type KeyState = 'root' | 'scale' | 'none'
+
+function getState(noteIdx: number, rootNote: number | undefined, scaleSet: Set<number>): KeyState {
+  if (rootNote !== undefined && rootNote === noteIdx) return 'root'
+  if (scaleSet.has(noteIdx)) return 'scale'
+  return 'none'
+}
+
+function whiteKeyClass(state: KeyState): string {
+  if (state === 'root')  return 'bg-sky-400 border-sky-400 shadow-[0_0_14px_rgba(56,189,248,0.5)]'
+  if (state === 'scale') return 'bg-violet-300/50 border-violet-400'
+  return 'bg-white border-gray-300 hover:bg-gray-50'
+}
+
+function blackKeyClass(state: KeyState): string {
+  if (state === 'root')  return 'bg-sky-500 shadow-[0_0_12px_rgba(56,189,248,0.7)]'
+  if (state === 'scale') return 'bg-violet-500'
+  return 'bg-gray-600 hover:bg-gray-500'
+}
+
+function whiteTextClass(state: KeyState): string {
+  if (state === 'root')  return 'text-slate-900 font-bold'
+  if (state === 'scale') return 'text-violet-800 font-semibold'
+  return 'text-gray-400'
+}
+
+function blackTextClass(state: KeyState): string {
+  if (state === 'root')  return 'text-slate-900 font-bold'
+  if (state === 'scale') return 'text-white font-semibold'
+  return 'text-gray-300'
+}
+
+export default function PianoKeyboard({ scaleNotes = [], rootNote, onNoteClick, label }: PianoKeyboardProps) {
+  const scaleSet = new Set(scaleNotes)
+  const totalWidth = 15 * WHITE_W
 
   const keys: React.ReactNode[] = []
 
   for (let oct = 0; oct < 2; oct++) {
-    // White keys
     for (let wi = 0; wi < 7; wi++) {
       const noteIdx = WHITE_INDICES[wi]
       const x = (oct * 7 + wi) * WHITE_W
-      const isHighlighted = highlightedNotes.includes(noteIdx)
-      const isRoot = rootNote === noteIdx
-      const isC = noteIdx === 0
       const octaveLabel = oct === 0 ? 4 : 5
-
+      const state = getState(noteIdx, rootNote, scaleSet)
       keys.push(
         <div
           key={`w-${oct}-${wi}`}
-          onClick={() => {
-            playPianoNote(noteIdx, oct === 0 ? 4 : 5).catch(() => {})
-            onNoteClick?.(noteIdx)
-          }}
+          onClick={() => { playPianoNote(noteIdx, octaveLabel).catch(() => {}); onNoteClick?.(noteIdx) }}
           style={{ left: x, width: WHITE_W, height: WHITE_H, top: 0 }}
           className={twMerge(
-            'absolute border border-studio-border rounded-b-md flex flex-col justify-end items-center pb-1 cursor-pointer transition-colors select-none',
-            isRoot
-              ? 'bg-studio-accent shadow-[0_0_12px_rgba(56,189,248,0.5)]'
-              : isHighlighted
-              ? 'bg-studio-accent/30 border-studio-accent/60'
-              : 'bg-white hover:bg-gray-100'
+            'absolute border rounded-b-md flex flex-col justify-end items-center pb-2 cursor-pointer transition-colors select-none',
+            whiteKeyClass(state)
           )}
         >
-          <span className={twMerge(
-            'font-mono leading-none',
-            isC ? 'text-[8px]' : 'text-[7px]',
-            isRoot ? 'text-studio-bg font-bold' : isHighlighted ? 'text-studio-accent font-semibold' : 'text-gray-400'
-          )}>
-            {isC ? `C${octaveLabel}` : NOTE_NAMES_12[noteIdx]}
+          <span className={twMerge('font-mono text-[11px] leading-none', whiteTextClass(state))}>
+            {noteIdx === 0 ? `C${octaveLabel}` : NOTE_NAMES_12[noteIdx]}
           </span>
         </div>
       )
     }
 
-    // Black keys
     for (let bi = 0; bi < 5; bi++) {
       const noteIdx = BLACK_NOTE_INDICES[bi]
       const x = oct * OCTAVE_W + BLACK_X_OFFSETS[bi]
-      const isHighlighted = highlightedNotes.includes(noteIdx)
-      const isRoot = rootNote === noteIdx
-
+      const state = getState(noteIdx, rootNote, scaleSet)
       keys.push(
         <div
           key={`b-${oct}-${bi}`}
-          onClick={() => {
-            playPianoNote(noteIdx, oct === 0 ? 4 : 5).catch(() => {})
-            onNoteClick?.(noteIdx)
-          }}
+          onClick={() => { playPianoNote(noteIdx, oct === 0 ? 4 : 5).catch(() => {}); onNoteClick?.(noteIdx) }}
           style={{ left: x, width: BLACK_W, height: BLACK_H, top: 0, zIndex: 10 }}
           className={twMerge(
-            'absolute rounded-b-md flex flex-col justify-end items-center pb-1 cursor-pointer transition-colors select-none',
-            isRoot
-              ? 'bg-studio-accent shadow-[0_0_10px_rgba(56,189,248,0.6)]'
-              : isHighlighted
-              ? 'bg-studio-accent/70'
-              : 'bg-[#1e1e2e] hover:bg-[#2a2a3e]'
+            'absolute rounded-b-md flex flex-col justify-end items-center pb-1.5 cursor-pointer transition-colors select-none',
+            blackKeyClass(state)
           )}
         >
-          <span className={twMerge(
-            'font-mono text-[6px] leading-none',
-            isRoot ? 'text-studio-bg' : isHighlighted ? 'text-white' : 'text-gray-600'
-          )}>
+          <span className={twMerge('font-mono text-[9px] leading-none', blackTextClass(state))}>
             {NOTE_NAMES_12[noteIdx]}
           </span>
         </div>
@@ -101,28 +107,18 @@ export default function PianoKeyboard({ highlightedNotes = [], rootNote, onNoteC
   }
 
   // Final C6
-  const c6X = 14 * WHITE_W
+  const c6State = getState(0, rootNote, scaleSet)
   keys.push(
     <div
       key="w-c6"
-      onClick={() => {
-        playPianoNote(0, 6).catch(() => {})
-        onNoteClick?.(0)
-      }}
-      style={{ left: c6X, width: WHITE_W, height: WHITE_H, top: 0 }}
+      onClick={() => { playPianoNote(0, 6).catch(() => {}); onNoteClick?.(0) }}
+      style={{ left: 14 * WHITE_W, width: WHITE_W, height: WHITE_H, top: 0 }}
       className={twMerge(
-        'absolute border border-studio-border rounded-b-md flex flex-col justify-end items-center pb-1 cursor-pointer transition-colors select-none',
-        rootNote === 0
-          ? 'bg-studio-accent shadow-[0_0_12px_rgba(56,189,248,0.5)]'
-          : highlightedNotes.includes(0)
-          ? 'bg-studio-accent/30 border-studio-accent/60'
-          : 'bg-white hover:bg-gray-100'
+        'absolute border rounded-b-md flex flex-col justify-end items-center pb-2 cursor-pointer transition-colors select-none',
+        whiteKeyClass(c6State)
       )}
     >
-      <span className={twMerge(
-        'font-mono text-[8px] leading-none',
-        rootNote === 0 ? 'text-studio-bg font-bold' : highlightedNotes.includes(0) ? 'text-studio-accent font-semibold' : 'text-gray-400'
-      )}>
+      <span className={twMerge('font-mono text-[11px] leading-none', whiteTextClass(c6State))}>
         C6
       </span>
     </div>
