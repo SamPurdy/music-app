@@ -30,6 +30,17 @@ interface Section {
 - Transpose: `transposeChord(chord, semitones)` from `src/lib/guitar/chords.ts`
 - Multiple sections expandable simultaneously (Set-based, not single toggle)
 
+## Save File Format
+See `docs/context/schemas.md` for the exact JSON schema.  
+Key points: `chords` is always `string[]`, `lyrics` is a single newline-separated `string`, timestamps are ISO 8601.
+
+```ts
+// Correct save call pattern:
+const song = { id: crypto.randomUUID(), title: songName, key: songKey, tempo: bpm, timeSignature, sections, createdAt, updatedAt: new Date().toISOString() }
+const blob = new Blob([JSON.stringify(song, null, 2)], { type: 'application/json' })
+// trigger download or POST to public/songs/
+```
+
 ## Watch Out
 - `onChange` on key dropdown must use `e.target.value`, NOT the current state value
 - Song sidebar (key/bpm/time) updates reactively — no manual refresh needed

@@ -39,6 +39,10 @@ playPianoChord(chordName).catch(() => {})
 // Check that chord is a valid chordName string before calling
 ```
 
+## Suggestion Schema
+See `docs/context/schemas.md` for full interface.  
+**Critical for audio:** when `type === 'chord'`, `content` must be a bare chord name (`"Am7"`, `"Cmaj7"`) — no other words. This string is passed directly to `playPianoChord(content)`.
+
 ## Watch Out
 - Each key/genre combination should generate fresh results — do not accumulate
 - Play buttons were previously broken because chord data wasn't correctly parsed from `content` string

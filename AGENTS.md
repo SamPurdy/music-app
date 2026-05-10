@@ -21,6 +21,16 @@
 - Package manager: `npm` (not yarn or pnpm)
 - Git: standard git CLI via bash
 
+## 🔧 Git Hook Setup (one-time, per clone)
+
+This repo ships a pre-commit hook that warns if `docs/HANDOFF.md` hasn't been updated when committing `src/` changes. Activate it once after cloning:
+
+```bash
+git config core.hooksPath .githooks
+```
+
+The hook never hard-blocks a commit — it only warns. To bypass: `git commit --no-verify`
+
 ---
 
 ## Project Overview
