@@ -1,4 +1,5 @@
 import { twMerge } from 'tailwind-merge'
+import { playPianoNote } from '@/lib/audio/synth'
 
 interface PianoKeyboardProps {
   highlightedNotes?: number[]
@@ -39,7 +40,10 @@ export default function PianoKeyboard({ highlightedNotes = [], rootNote, onNoteC
       keys.push(
         <div
           key={`w-${oct}-${wi}`}
-          onClick={() => onNoteClick?.(noteIdx)}
+          onClick={() => {
+            playPianoNote(noteIdx, oct === 0 ? 4 : 5).catch(() => {})
+            onNoteClick?.(noteIdx)
+          }}
           style={{ left: x, width: WHITE_W, height: WHITE_H, top: 0 }}
           className={twMerge(
             'absolute border border-studio-border rounded-b-md flex flex-col justify-end items-center pb-1 cursor-pointer transition-colors select-none',
@@ -71,7 +75,10 @@ export default function PianoKeyboard({ highlightedNotes = [], rootNote, onNoteC
       keys.push(
         <div
           key={`b-${oct}-${bi}`}
-          onClick={() => onNoteClick?.(noteIdx)}
+          onClick={() => {
+            playPianoNote(noteIdx, oct === 0 ? 4 : 5).catch(() => {})
+            onNoteClick?.(noteIdx)
+          }}
           style={{ left: x, width: BLACK_W, height: BLACK_H, top: 0, zIndex: 10 }}
           className={twMerge(
             'absolute rounded-b-md flex flex-col justify-end items-center pb-1 cursor-pointer transition-colors select-none',
@@ -98,7 +105,10 @@ export default function PianoKeyboard({ highlightedNotes = [], rootNote, onNoteC
   keys.push(
     <div
       key="w-c6"
-      onClick={() => onNoteClick?.(0)}
+      onClick={() => {
+        playPianoNote(0, 6).catch(() => {})
+        onNoteClick?.(0)
+      }}
       style={{ left: c6X, width: WHITE_W, height: WHITE_H, top: 0 }}
       className={twMerge(
         'absolute border border-studio-border rounded-b-md flex flex-col justify-end items-center pb-1 cursor-pointer transition-colors select-none',

@@ -1,9 +1,11 @@
 import { useState } from 'react'
+import * as Tone from 'tone'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Shuffle, Download, Music2, Layers } from 'lucide-react'
+import { Play, Shuffle, Download, Music2, Layers, Loader2 } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import { generateMajorProgression, generateMinorProgression } from '@/lib/music-theory/progressions'
 import type { ChordQuality } from '@/types'
+import { playPianoChord, playGuitarChord, chordNotesToNoteNames } from '@/lib/audio/synth'
 
 const KEYS        = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const KEYS_LABEL  = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
@@ -24,12 +26,39 @@ export default function ChordProgressionDisplay() {
   const [mode, setMode]         = useState<'major' | 'minor'>('major')
   const [length, setLength]     = useState(4)
   const [result, setResult]     = useState<Progression | null>(null)
+  const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano')
+  const [isPlaying, setIsPlaying] = useState(false)
 
   const generate = () => {
     const prog = mode === 'major'
       ? generateMajorProgression(key, length)
       : generateMinorProgression(key, length)
     setResult(prog)
+  }
+
+  const playChord = (notes: string[]) => {
+    const noteNames = chordNotesToNoteNames(notes, instrument)
+    if (instrument === 'piano') {
+      playPianoChord(noteNames, '2n').catch(() => {})
+    } else {
+      playGuitarChord(noteNames, '2n').catch(() => {})
+    }
+  }
+
+  const playAll = async () => {
+    if (!result || isPlaying) return
+    setIsPlaying(true)
+    await Tone.start()
+    for (let i = 0; i < result.chords.length; i++) {
+      await new Promise<void>(resolve => setTimeout(resolve, i === 0 ? 0 : 2000))
+      const noteNames = chordNotesToNoteNames(result.chords[i].notes, instrument)
+      if (instrument === 'piano') {
+        playPianoChord(noteNames, '2n').catch(() => {})
+      } else {
+        playGuitarChord(noteNames, '2n').catch(() => {})
+      }
+    }
+    setTimeout(() => setIsPlaying(false), result.chords.length * 2000 + 500)
   }
 
   return (
@@ -137,6 +166,34 @@ export default function ChordProgressionDisplay() {
                 </span>
               </div>
               <div className="flex items-center gap-1.5">
+                {/* Instrument toggle */}
+                <div className="flex rounded-lg border border-studio-border overflow-hidden">
+                  {(['piano', 'guitar'] as const).map(inst => (
+                    <button
+                      key={inst}
+                      onClick={() => setInstrument(inst)}
+                      className={twMerge(
+                        'px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide transition-all',
+                        instrument === inst
+                          ? 'bg-studio-accent/20 border-studio-accent/50 text-studio-accent'
+                          : 'text-studio-muted hover:text-studio-text'
+                      )}
+                    >
+                      {inst === 'piano' ? '🎹' : '🎸'}
+                    </button>
+                  ))}
+                </div>
+                {/* Play All */}
+                <button
+                  onClick={playAll}
+                  disabled={isPlaying}
+                  className="p-1.5 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors disabled:opacity-50 flex items-center gap-1"
+                  title="Play All"
+                >
+                  {isPlaying
+                    ? <Loader2 size={13} className="animate-spin" />
+                    : <Play size={13} fill="currentColor" />}
+                </button>
                 <span className="text-[11px] text-studio-muted">{result.chords.length} chords</span>
                 <button
                   onClick={generate}
@@ -171,8 +228,15 @@ export default function ChordProgressionDisplay() {
                     )}
                   >
                     {/* Position */}
-                    <div className="absolute top-2.5 right-2.5 text-[9px] font-mono text-studio-muted/40">
-                      {i + 1}
+                    <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
+                      <button
+                        onClick={() => playChord(chord.notes)}
+                        className="p-1.5 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors opacity-0 group-hover:opacity-100"
+                        title="Play chord"
+                      >
+                        <Play size={10} fill="currentColor" />
+                      </button>
+                      <span className="text-[9px] font-mono text-studio-muted/40">{i + 1}</span>
                     </div>
 
                     {/* Roman numeral */}

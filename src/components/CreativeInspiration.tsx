@@ -1,14 +1,34 @@
 import { useState, useEffect } from 'react'
+import * as Tone from 'tone'
 import { motion } from 'framer-motion'
 import type { CreativeSuggestion } from '@/types'
 import { suggestProgressions } from '@/lib/music-theory/progressions'
-import { Sparkles, Flame, Zap, Wand2, ArrowRight } from 'lucide-react'
+import { Sparkles, Flame, Zap, Wand2, ArrowRight, Play } from 'lucide-react'
+import { playPianoChord, playGuitarChord, chordNotesToNoteNames } from '@/lib/audio/synth'
+
+function parseChordRoots(content: string): string[] {
+  const matches = content.match(/[A-G][#b]?/g)
+  return [...new Set(matches ?? [])]
+}
 
 export default function CreativeInspiration() {
   const [suggestions, setSuggestions] = useState<CreativeSuggestion[]>([])
   const [currentKey, setCurrentKey] = useState('C')
   const currentScale = 'major'
   const [currentGenre, setCurrentGenre] = useState('pop')
+  const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano')
+
+  const playChordSuggestion = async (content: string) => {
+    await Tone.start()
+    const roots = parseChordRoots(content)
+    if (roots.length === 0) return
+    const noteNames = chordNotesToNoteNames(roots.slice(0, 4), instrument)
+    if (instrument === 'piano') {
+      playPianoChord(noteNames, '2n').catch(() => {})
+    } else {
+      playGuitarChord(noteNames, '2n').catch(() => {})
+    }
+  }
 
   // Debounced key change to avoid too many suggestions
   useEffect(() => {
@@ -106,18 +126,36 @@ export default function CreativeInspiration() {
           </div>
         </div>
 
-        {/* Clear Button */}
-        <button
-          onClick={clearSuggestions}
-          disabled={suggestions.length === 0}
-          className="group relative w-full py-2.5 text-[11px] font-semibold uppercase tracking-wider rounded-lg bg-gradient-to-br from-white/[0.02] via-transparent to-white/[0.01] border border-studio-border/60 hover:border-yellow-400/40 hover:text-yellow-300/80 transition-all studio-button-gradient shadow-sm flex items-center justify-center gap-2 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {/* Clear icon */}
-          {suggestions.length > 0 && (
-            <span className="absolute left-3 text-studio-muted transition-all">✕</span>
-          )}
-          Clear Suggestions
-        </button>
+        {/* Clear Button + Instrument Toggle */}
+        <div className="flex gap-2">
+          {/* Instrument Toggle */}
+          <div className="flex rounded-lg border border-studio-border overflow-hidden shrink-0">
+            {(['piano', 'guitar'] as const).map(inst => (
+              <button
+                key={inst}
+                onClick={() => setInstrument(inst)}
+                className={`px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide transition-all ${
+                  instrument === inst
+                    ? 'bg-studio-accent/20 border-studio-accent/50 text-studio-accent'
+                    : 'border-studio-border text-studio-muted hover:text-studio-text'
+                }`}
+              >
+                {inst === 'piano' ? '🎹' : '🎸'}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={clearSuggestions}
+            disabled={suggestions.length === 0}
+            className="group relative w-full py-2.5 text-[11px] font-semibold uppercase tracking-wider rounded-lg bg-gradient-to-br from-white/[0.02] via-transparent to-white/[0.01] border border-studio-border/60 hover:border-yellow-400/40 hover:text-yellow-300/80 transition-all studio-button-gradient shadow-sm flex items-center justify-center gap-2 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {/* Clear icon */}
+            {suggestions.length > 0 && (
+              <span className="absolute left-3 text-studio-muted transition-all">✕</span>
+            )}
+            Clear Suggestions
+          </button>
+        </div>
       </div>
 
       {/* Suggestions List */}
@@ -180,14 +218,25 @@ export default function CreativeInspiration() {
                     <span className="text-xs text-studio-text font-medium truncate">{suggestion.content}</span>
                   </div>
 
-                  {/* Confidence indicator */}
-                  <div className="flex items-center gap-1 px-2 py-1 rounded-lg border border-studio-border/50 bg-studio-surface shrink-0">
-                    <motion.div
-                      animate={{ opacity: [0.4, 1, 0.4] }}
-                      transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
-                      className="w-1.5 h-1.5 rounded-full bg-green-400/80 shadow-[0_0_6px_rgba(74,222,128,0.6)]"
-                    />
-                    <span className="text-[9px] font-mono text-studio-muted">{Math.round(suggestion.confidence * 100)}%</span>
+                  {/* Confidence indicator + Play button */}
+                  <div className="flex items-center gap-1 shrink-0">
+                    {suggestion.type === 'chord' && (
+                      <button
+                        onClick={() => playChordSuggestion(suggestion.content).catch(() => {})}
+                        className="p-1.5 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors opacity-0 group-hover:opacity-100"
+                        title="Play chord"
+                      >
+                        <Play size={10} fill="currentColor" />
+                      </button>
+                    )}
+                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg border border-studio-border/50 bg-studio-surface">
+                      <motion.div
+                        animate={{ opacity: [0.4, 1, 0.4] }}
+                        transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
+                        className="w-1.5 h-1.5 rounded-full bg-green-400/80 shadow-[0_0_6px_rgba(74,222,128,0.6)]"
+                      />
+                      <span className="text-[9px] font-mono text-studio-muted">{Math.round(suggestion.confidence * 100)}%</span>
+                    </div>
                   </div>
                 </div>
 

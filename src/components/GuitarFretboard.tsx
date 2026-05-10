@@ -1,16 +1,20 @@
+import { playGuitarNote } from '@/lib/audio/synth'
+
 interface GuitarFretboardProps {
   scaleNotes: number[]
   rootNote: number
   numFrets?: number
+  onNoteClick?: (noteIndex: number, string: number, fret: number) => void
 }
 
 // Standard tuning open notes (semitone indices 0-11): E A D G B e
 const OPEN_NOTES = [4, 9, 2, 7, 11, 4]
+const OPEN_OCTAVES = [2, 2, 3, 3, 3, 4]
 const STRING_NAMES = ['E', 'A', 'D', 'G', 'B', 'e']
 const FRET_MARKERS = [3, 5, 7, 9, 12]
 const NOTE_NAMES_12 = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 
-export default function GuitarFretboard({ scaleNotes, rootNote, numFrets = 12 }: GuitarFretboardProps) {
+export default function GuitarFretboard({ scaleNotes, rootNote, numFrets = 12, onNoteClick }: GuitarFretboardProps) {
   const leftMargin = 28
   const topMargin = 22
   const bottomPad = 24
@@ -99,13 +103,23 @@ export default function GuitarFretboard({ scaleNotes, rootNote, numFrets = 12 }:
         {/* Scale dots */}
         {Array.from({ length: numStrings }, (_, s) => s).flatMap(s =>
           Array.from({ length: numFrets }, (_, fIdx) => fIdx + 1).map(f => {
-            const note = (OPEN_NOTES[s] + f) % 12
+            const absoluteSemitone = OPEN_NOTES[s] + f
+            const note = absoluteSemitone % 12
             if (!scaleNotes.includes(note)) return null
+            const octave = OPEN_OCTAVES[s] + Math.floor(absoluteSemitone / 12)
             const isRoot = note === rootNote
             const cx = fretX(f) - fretWidth / 2
             const cy = stringY(s)
             return (
-              <g key={`${s}-${f}`}>
+              <g
+                key={`${s}-${f}`}
+                onClick={() => {
+                  playGuitarNote(note, octave).catch(() => {})
+                  onNoteClick?.(note, s, f)
+                }}
+                cursor="pointer"
+                style={{ cursor: 'pointer' }}
+              >
                 <circle cx={cx} cy={cy} r={8} fill={isRoot ? '#38bdf8' : '#8b5cf6'} opacity={0.9} />
                 <text x={cx} y={cy + 3} textAnchor="middle" fontSize={7} fill="white" fontFamily="monospace" fontWeight="bold">
                   {NOTE_NAMES_12[note]}
