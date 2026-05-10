@@ -22,8 +22,17 @@ Read `ARCHITECTURE.md` only if you need deeper reference (component props, lib e
 Run: `npm run build 2>&1 | tail -20`
 Report any TypeScript or build errors before proceeding.
 
-### Step 5 — Understand the task
-Ask the user what they want to work on. Look up only the relevant source file(s) for that task — don't pre-read everything.
+### Step 5 — Suggest next steps
+Before asking the user what to work on, review what you've read (HANDOFF next steps, DEVLOG watch-outs, build errors) and proactively suggest 3–5 concrete things to work on. Format as a short numbered list covering:
+- Any carry-forward tasks from `docs/HANDOFF.md`
+- Any known issues or watch-outs from `docs/DEVLOG.md`
+- Any build errors found in Step 4
+- Feature improvements or polish that seem like natural next steps for a professional music app
+
+Then ask: **"Which of these would you like to tackle, or is there something else on your mind?"**
+
+### Step 6 — Understand the task
+Once the user picks a direction, look up only the relevant source file(s) — don't pre-read everything. For component work, read the matching `docs/context/*.md` card first, then the actual source file.
 
 ---
 
