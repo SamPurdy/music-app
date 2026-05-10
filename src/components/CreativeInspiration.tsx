@@ -1,15 +1,9 @@
 import { useState, useEffect } from 'react'
-import * as Tone from 'tone'
 import { motion } from 'framer-motion'
 import type { CreativeSuggestion } from '@/types'
 import { suggestProgressions } from '@/lib/music-theory/progressions'
 import { Sparkles, Flame, Zap, Wand2, ArrowRight, Play } from 'lucide-react'
-import { playPianoChord, playGuitarChord, chordNotesToNoteNames } from '@/lib/audio/synth'
-
-function parseChordRoots(content: string): string[] {
-  const matches = content.match(/[A-G][#b]?/g)
-  return [...new Set(matches ?? [])]
-}
+import { playProgression } from '@/lib/audio/synth'
 
 export default function CreativeInspiration() {
   const [suggestions, setSuggestions] = useState<CreativeSuggestion[]>([])
@@ -18,16 +12,8 @@ export default function CreativeInspiration() {
   const [currentGenre, setCurrentGenre] = useState('pop')
   const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano')
 
-  const playChordSuggestion = async (content: string) => {
-    await Tone.start()
-    const roots = parseChordRoots(content)
-    if (roots.length === 0) return
-    const noteNames = chordNotesToNoteNames(roots.slice(0, 4), instrument)
-    if (instrument === 'piano') {
-      playPianoChord(noteNames, '2n').catch(() => {})
-    } else {
-      playGuitarChord(noteNames, '2n').catch(() => {})
-    }
+  const playChordSuggestion = (content: string) => {
+    playProgression(content, instrument).catch(() => {})
   }
 
   // Debounced key change to avoid too many suggestions
@@ -222,7 +208,7 @@ export default function CreativeInspiration() {
                   <div className="flex items-center gap-1 shrink-0">
                     {suggestion.type === 'chord' && (
                       <button
-                        onClick={() => playChordSuggestion(suggestion.content).catch(() => {})}
+                        onClick={() => playChordSuggestion(suggestion.content)}
                         className="p-1.5 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors opacity-0 group-hover:opacity-100"
                         title="Play chord"
                       >
