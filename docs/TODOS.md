@@ -13,8 +13,12 @@
 
 <!-- Bugs, broken features, things that block the user -->
 
-- [ ] Inspiration tab play buttons — chord audio still unreliable (content string parsing)
+- [x] 2026-05-10 — Inspiration tab play buttons — chord audio now works with roman numeral mapping
 - [ ] CreativeInspiration list still may append on repeated genre/key changes — verify clear behavior
+- [ ] MIDI Export: Integrate @tonejs/midi in src/lib/midi/export.ts, construct binary blobs, and link to click handlers on export buttons
+- [ ] Fix noteToMidi / midiToNote in src/lib/music-theory/notes.ts (NOTE_NAMES has 16 items instead of 12 chromatic semitones)
+- [ ] Fix transposeChord in src/lib/guitar/chords.ts (negative transposition returns undefined string)
+- [ ] Fix Roman numeral analysis/lookup for minor keys in progressions.ts and notes.ts
 
 ---
 
@@ -26,6 +30,8 @@
 - [ ] Song tab — save to `public/songs/` not fully implemented (currently download only)
 - [ ] Theory Explorer — add interval name labels between keys on piano
 - [ ] Guitar Lab — show scale note names on fretboard dots
+- [ ] Make Right Sidebar (Harmonic Context) in App.tsx dynamic (currently static and hardcoded to C Major)
+- [ ] Play full chord extensions in synth.ts playProgression instead of dropping them to simple triads
 
 ---
 
@@ -34,12 +40,13 @@
 <!-- Ideas, enhancements, non-blocking improvements -->
 
 - [ ] Add metronome / click track to Song tab
-- [ ] Circle of Fifths visualization in Theory tab
-- [ ] Chord Lab — copy progression to Song section with one click
+- [x] 2026-05-31 — Emotion → Chord Mapper (Theory tab)
+- [x] 2026-05-31 — Chord Function Explainer (Chord Lab tab)
+- [x] 2026-05-31 — Chord Lab — copy progression to Song section with one click
 - [ ] Song tab — loop playback for individual sections
-- [ ] MIDI export for song sections (foundation exists in `src/lib/midi/export.ts`)
 - [ ] Dark/light mode toggle
 - [ ] Mobile-responsive layout pass
+- [ ] Refactor duplicate transposition math and FLAT_TO_SHARP constants into a single utility module
 
 ---
 

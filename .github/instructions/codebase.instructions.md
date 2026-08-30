@@ -37,6 +37,7 @@ Each card has props, state shape, key behaviors, and watch-outs for that compone
 | Component file | Context card |
 |---|---|
 | `ChordProgressionDisplay.tsx` | `docs/context/chord-progression.md` |
+| `ChordFunctionExplainer.tsx` | see `docs/context/chord-progression.md` (Watch Out section) |
 | `CreativeInspiration.tsx` | `docs/context/inspiration.md` |
 | `GuitarLab.tsx` + `GuitarChordDiagram.tsx` + `GuitarFretboard.tsx` | `docs/context/guitar-lab.md` |
 | `SongStructureBuilder.tsx` | `docs/context/song-builder.md` |
@@ -49,8 +50,35 @@ Each card has props, state shape, key behaviors, and watch-outs for that compone
 ## After Making Changes
 1. Run `npm run build` and report any TypeScript errors before declaring done
 2. **Update `docs/TODOS.md`:** mark any completed todos `[x]` and move to ✅ Completed; add new todos if bugs/improvements are discovered
-3. Append a concise entry to `docs/DEVLOG.md` summarizing what changed and why
+3. Append a DEVLOG entry — see exact format below
 4. **DO NOT commit or push** — show the user a list of changed files and wait for their approval
+
+### DEVLOG Entry Format — copy this template exactly
+
+Insert a new entry at the **very top** of `docs/DEVLOG.md`, directly below the header block (the lines ending with `---`).
+
+```
+## YYYY-MM-DD — Short title describing what changed
+
+**Changed files:** `src/path/file.tsx`, `docs/DEVLOG.md`
+
+**What changed:**
+- Bullet point describing one specific change
+- Another bullet point for a second change
+
+**Why:** One or two sentences explaining the reason for the change.
+
+---
+```
+
+**Rules — read carefully:**
+- Each `**label:**` must be on its own line, followed by a blank line if a list follows
+- Bullet points must each be on their own line starting with `- `
+- There must be a blank line between the title (`##`) and `**Changed files:**`
+- There must be a blank line between `**Changed files:**` and `**What changed:**`
+- There must be a blank line before the closing `---`
+- **Do NOT write the entire entry on one line** — every `**label:**` and every `- ` bullet is a separate line
+- If you are unsure whether newlines will be preserved, write each section out explicitly with a line break after every bullet
 
 ## Workflow Rules for Local Model
 

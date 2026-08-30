@@ -78,10 +78,21 @@ SVG chord diagram. Props: `chord: GuitarChordVoicing`, `size?: 'sm'|'md'|'lg'`, 
 6-string fretboard with highlighted scale notes. Props: `scale`, `root`, `frets?`, `onNoteClick?`.
 
 ### `ChordProgressionDisplay.tsx`
-Chord grid by key/mode. Plays chords via `synth.ts`. Exports MIDI. Shows roman numerals.
+Chord grid by key/mode. Plays chords via `synth.ts`. Exports MIDI. Shows roman numerals. Clicking a chord card opens `ChordFunctionExplainer` panel below the grid. Green "Song ↗" button sends progression to Song tab via `onSendToSong` prop.
+
+**Props:** `onSendToSong?: (prog: { key: string; chords: string[] }) => void`
+
+### `ChordFunctionExplainer.tsx`
+Panel showing harmonic function of a selected chord. Shows name, tension bar (0–10), full description, common cadences, and songwriting tip. Data from `src/lib/music-theory/chord-functions.ts`.
+
+**Props:** `roman: string`, `chordName: string`, `keyName: string`, `onClose: () => void`
 
 ### `SongStructureBuilder.tsx`
-Drag-and-drop song sections. Each section has chords + lyrics. Saves/loads JSON. Transposes all chords.
+Drag-and-drop song sections. Each section has a space-separated chord string + lyrics. Saves/loads JSON + localStorage. Transposes all chords. Shows acceptance banner when `pendingProgression` prop is set.
+
+**Props:** `onMetaChange?`, `pendingProgression?: { key: string; chords: string[] } | null`, `onClearPending?: () => void`
+
+**⚠️ `Section.chords` is a space-separated string, NOT `string[]`**
 
 ### `CreativeInspiration.tsx`
 Suggestions cards by key/genre. Clears list on key/genre change (does NOT append). Has play buttons.
@@ -103,7 +114,8 @@ Root + scale selector → passes to `PianoKeyboard` and interval table. Passes `
 | `scales.ts` | `SCALES` record, `getScaleNoteNames(root, scaleKey)`, `getScaleNoteIndices(root, scaleKey)` |
 | `intervals.ts` | `INTERVALS` array of `IntervalDefinition` (semitones, shortName, fullName, consonance) |
 | `notes.ts` | `noteToMidi()`, `midiToNote()`, `getScaleNotes()`, `getChordNotes()`, `getRomanNumeral()` |
-| `progressions.ts` | `generateMajorProgression()`, `generateMinorProgression()`, `analyzeProgression()`, `suggestProgressions()` |
+| `progressions.ts` | `generateMajorProgression()`, `generateMinorProgression()`, `generateRandomProgression()`, `analyzeProgression()`, `suggestProgressions()`, `romanToChords()` |
+| `chord-functions.ts` | `getChordFunction(roman)` → `ChordFunctionInfo \| null` — covers all 14 diatonic Roman numerals with name, tension (0–10), descriptions, cadences, tip |
 | `voice-leading.ts` | `analyzeVoiceLeading()`, `findClosestVoice()` |
 
 **`SCALES` object keys:** `major`, `naturalMinor`, `harmonicMinor`, `melodicMinor`, `majorPentatonic`, `minorPentatonic`, `blues`, `dorian`, `phrygian`, `lydian`, `mixolydian`, `locrian`, `wholeTone`, `diminished`

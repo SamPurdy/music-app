@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Music2, Layers, Lightbulb, BookOpen, Guitar, Circle, Zap } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
 import clsx from 'clsx'
+import * as Tonal from 'tonal'
 import ChordProgressionDisplay from './components/ChordProgressionDisplay'
 import SongStructureBuilder from './components/SongStructureBuilder'
 import CreativeInspiration from './components/CreativeInspiration'
@@ -20,21 +21,47 @@ const TABS: { id: Tab; label: string; Icon: React.ElementType }[] = [
   { id: 'guitar',      label: 'Guitar Lab',  Icon: Guitar    },
 ]
 
-const HARMONIC_CONTEXT = [
-  { label: 'Key',      value: 'C Major'        },
-  { label: 'Scale',    value: 'C D E F G A B'  },
-  { label: 'Degree',   value: 'I · V · vi · IV' },
-  { label: 'Mode',     value: 'Ionian'          },
-  { label: 'Quality',  value: 'Triadic'         },
-  { label: 'Relative', value: 'A Minor'         },
-  { label: 'Parallel', value: 'C Phrygian'      },
-  { label: 'Capo',     value: 'None'            },
-]
+
+
+interface PendingProgression {
+  key: string
+  chords: string[]
+}
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('song')
   const [midiStatus] = useState<MidiStatus>('idle')
   const [songMeta, setSongMeta] = useState({ key: 'C', tempo: 120, timeSig: '4/4' })
+  const [pendingProgression, setPendingProgression] = useState<PendingProgression | null>(null)
+
+  const key = songMeta.key
+  const scaleNotes = Tonal.Scale.get(`${key} major`).notes.join(' ')
+  const relativeMinor = Tonal.Scale.get(`${key} major`).notes[5] ? `${Tonal.Scale.get(`${key} major`).notes[5]} Minor` : ''
+  const popProgression = (() => {
+    try {
+      const scale = Tonal.Scale.get(`${key} major`)
+      if (scale.notes.length >= 6) {
+        return `${scale.notes[0]} · ${scale.notes[4]} · ${scale.notes[5]}m · ${scale.notes[3]}`
+      }
+    } catch {}
+    return ''
+  })()
+
+  const dynamicContext = [
+    { label: 'Key',      value: `${key} Major` },
+    { label: 'Scale',    value: scaleNotes || `${key} D E F G A B` },
+    { label: 'Degree',   value: `I · V · vi · IV` + (popProgression ? ` (${popProgression})` : '') },
+    { label: 'Mode',     value: 'Ionian (Major)' },
+    { label: 'Quality',  value: 'Triadic' },
+    { label: 'Relative', value: relativeMinor || 'A Minor' },
+    { label: 'Parallel', value: `${key} Minor` },
+    { label: 'Capo',     value: 'None' },
+  ]
+
+  const handleSendToSong = (prog: PendingProgression) => {
+    setPendingProgression(prog)
+    setActiveTab('song')
+  }
 
   return (
     <div className="fixed inset-0 bg-studio-bg text-studio-text flex flex-col overflow-hidden">
@@ -156,8 +183,8 @@ function App() {
                   transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                   className="w-full min-h-full p-5 max-w-4xl mx-auto"
                 >
-                  {id === 'song'        && <SongStructureBuilder onMetaChange={setSongMeta} />}
-                  {id === 'chords'      && <ChordProgressionDisplay />}
+                  {id === 'song'        && <SongStructureBuilder onMetaChange={setSongMeta} pendingProgression={pendingProgression} onClearPending={() => setPendingProgression(null)} />}
+                  {id === 'chords'      && <ChordProgressionDisplay onSendToSong={handleSendToSong} />}
                   {id === 'inspiration' && <CreativeInspiration />}
                   {id === 'theory'      && <TheoryExplorer />}
                   {id === 'guitar'      && <GuitarLab />}
@@ -173,13 +200,13 @@ function App() {
             Harmonic Context
           </p>
 
-          {HARMONIC_CONTEXT.map(({ label, value }) => (
+          {dynamicContext.map(({ label, value }) => (
             <div
               key={label}
               className="group flex items-center justify-between px-2.5 py-2 rounded-lg border border-transparent hover:border-studio-border hover:bg-white/[0.02] transition-all cursor-pointer"
             >
               <span className="text-[10px] uppercase tracking-wider text-studio-muted shrink-0 mr-2">{label}</span>
-              <span className="text-[11px] font-medium text-studio-text text-right truncate">{value}</span>
+              <span className="text-[11px] font-medium text-studio-text text-right truncate" title={value}>{value}</span>
             </div>
           ))}
 

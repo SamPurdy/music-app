@@ -1,0 +1,65 @@
+/*
+ * index.css — Global styles entry point.
+ *
+ * Contains:
+ *   1. Tailwind CSS directives (required — do not remove)
+ *   2. Base HTML resets and global defaults
+ *   3. Scrollbar styling (optional — delete if not needed)
+ *   4. Text selection color (optional — matches your accent token)
+ *
+ * TODO: If you change your accent color in tailwind.config.js, update
+ * the ::selection colors below to match.
+ */
+
+/* ─── Tailwind CSS ────────────────────────────────────────────────────────── */
+/* These three directives inject Tailwind's base reset, utility classes,       */
+/* and component classes. They MUST be present for Tailwind to work.           */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─── Base resets ─────────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  /* TODO: Update font name if you change the font in tailwind.config.js */
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  /* Improves font rendering on macOS */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Text selection color ────────────────────────────────────────────────── */
+/* TODO: Update these to match your app-accent token color */
+::selection {
+  background-color: rgba(99, 102, 241, 0.35); /* indigo-500 at 35% opacity */
+  color: #e2e8f0;
+}
+
+/* ─── Custom scrollbar (Webkit / Chromium only) ───────────────────────────── */
+/* Falls back gracefully in Firefox (which uses the OS scrollbar).             */
+/* TODO: Adjust colors to match your theme, or delete this block entirely.     */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}

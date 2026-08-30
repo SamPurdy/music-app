@@ -1,0 +1,12 @@
+{
+  // Separate TS config for Node.js build tooling (vite.config.ts).
+  // Vite's config file runs in Node — it needs different settings than browser code.
+  "compilerOptions": {
+    "composite": true,
+    "skipLibCheck": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["vite.config.ts"]
+}

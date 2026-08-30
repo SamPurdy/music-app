@@ -33,6 +33,65 @@ function buildChord(root: string, quality: Quality, roman: string): Chord & { ro
   }
 }
 
+// Maps Roman numeral tokens to [scale degree index, quality].
+// Covers all numerals used in PROGRESSION_LIBRARY including jazz/extended forms.
+const MAJOR_ROMAN_MAP: Record<string, [number, Quality]> = {
+  'I':     [0, 'major'],
+  'I7':    [0, 'major'],
+  'IMaj7': [0, 'major'],
+  'ii':    [1, 'minor'],
+  'ii7':   [1, 'minor'],
+  'iii':   [2, 'minor'],
+  'iii7':  [2, 'minor'],
+  'IV':    [3, 'major'],
+  'IV7':   [3, 'major'],
+  'V':     [4, 'major'],
+  'V7':    [4, 'major'],
+  'vi':    [5, 'minor'],
+  'VI7':   [5, 'major'], // secondary dominant
+  'vii°':  [6, 'diminished'],
+}
+
+const MINOR_ROMAN_MAP: Record<string, [number, Quality]> = {
+  'i':     [0, 'minor'],
+  'i7':    [0, 'minor'],
+  'ii°':   [1, 'diminished'],
+  '♭III':  [2, 'major'],
+  'iv':    [3, 'minor'],
+  'iv7':   [3, 'minor'],
+  'v':     [4, 'minor'],
+  '♭VI':   [5, 'major'],
+  '♭VII':  [6, 'major'],
+}
+
+/**
+ * Convert a Roman numeral pattern string (e.g. "I – V – vi – IV") into
+ * actual chord names for the given key and scale type.
+ * Handles "Try " prefix, en-dash/em-dash/hyphen separators, and extended numerals.
+ */
+export function romanToChords(pattern: string, key: string, scaleType: 'major' | 'minor' = 'major'): string[] {
+  const cleaned = pattern.replace(/^try\s+/i, '')
+  const tokens = cleaned.split(/\s*[–—\-]\s*|\s+/).map(t => t.trim()).filter(Boolean)
+
+  const scale = Tonal.Scale.get(`${key} ${scaleType}`)
+  const fallback = scaleType === 'major'
+    ? ['C', 'D', 'E', 'F', 'G', 'A', 'B']
+    : ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb']
+  const notes = scale.notes.length > 0 ? scale.notes : fallback
+
+  const romanMap = scaleType === 'minor'
+    ? { ...MAJOR_ROMAN_MAP, ...MINOR_ROMAN_MAP }
+    : MAJOR_ROMAN_MAP
+
+  return tokens.flatMap(token => {
+    const entry = romanMap[token]
+    if (!entry) return []
+    const [degree, quality] = entry
+    const root = notes[degree] ?? 'C'
+    return [`${root}${qualitySuffix(quality)}`]
+  })
+}
+
 const MAJOR_PATTERNS: Record<number, number[]> = {
   2:  [0, 4],
   4:  [0, 4, 5, 3],
@@ -85,16 +144,59 @@ export function generateMinorProgression(key: string, length: number = 4) {
   return { chords, key, scaleNotes: notes }
 }
 
-export function analyzeProgression(chordNames: string[], key: string): { analysis: string[] } {
-  const scale = Tonal.Scale.get(`${key} major`)
+export function generateRandomProgression(
+  key: string,
+  length: number = 4,
+  scaleType: 'major' | 'minor' = 'major'
+): { chords: (Chord & { roman: string })[]; key: string; scaleNotes: string[] } {
+  const isMinor = scaleType === 'minor'
+  const scale = Tonal.Scale.get(`${key} ${scaleType}`)
+  const notes = scale.notes.length > 0 ? scale.notes : (isMinor ? ['C', 'D', 'Eb', 'F', 'G', 'Ab', 'Bb'] : ['C', 'D', 'E', 'F', 'G', 'A', 'B'])
+  const qualities = isMinor ? MINOR_QUALITIES : MAJOR_QUALITIES
+  const romans = isMinor ? MINOR_ROMANS : MAJOR_ROMANS
+
+  const chords: (Chord & { roman: string })[] = []
+  let lastRootIndex = -1
+
+  for (let i = 0; i < length; i++) {
+    const preferredIndices = [lastRootIndex, (lastRootIndex + 3) % 7, (lastRootIndex + 5) % 7]
+
+    let selectedIndex: number
+    if (i === 0) {
+      selectedIndex = Math.floor(Math.random() * notes.length)
+    } else {
+      const availableIndices = preferredIndices.filter(idx => idx >= 0 && idx < notes.length)
+      selectedIndex = availableIndices.length > 0
+        ? availableIndices[Math.floor(Math.random() * availableIndices.length)]
+        : Math.floor(Math.random() * notes.length)
+    }
+
+    lastRootIndex = selectedIndex
+    const root = notes[selectedIndex]
+    const quality = qualities[selectedIndex] ?? (isMinor ? 'minor' : 'major')
+    const roman = romans[selectedIndex] ?? '?'
+    chords.push(buildChord(root, quality, roman))
+  }
+
+  return { chords, key, scaleNotes: notes }
+}
+
+export function analyzeProgression(
+  chordNames: string[],
+  key: string,
+  scaleType: 'major' | 'minor' = 'major'
+): { analysis: string[] } {
+  const scale = Tonal.Scale.get(`${key} ${scaleType}`)
   const notes = scale.notes
+  const romans = scaleType === 'minor' ? MINOR_ROMANS : MAJOR_ROMANS
 
   const analysis = chordNames.map((chordName) => {
     const root = Tonal.Chord.get(chordName)?.root ?? chordName
     const degree = notes.findIndex(
       (n) => Tonal.Note.pitchClass(n) === Tonal.Note.pitchClass(root)
     )
-    return MAJOR_ROMANS[degree] ?? chordName
+    if (degree === -1) return chordName
+    return romans[degree] ?? chordName
   })
 
   return { analysis }
@@ -150,4 +252,3 @@ export default {
   analyzeProgression,
   suggestProgressions,
 }
-

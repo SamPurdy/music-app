@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { GUITAR_CHORDS, OPEN_CHORD_SHAPES, transposeChord } from '@/lib/guitar/chords'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { GUITAR_CHORDS, OPEN_CHORD_SHAPES, transposeChord, getGuitarVoicings } from '@/lib/guitar/chords'
 import { SCALES, getScaleNoteIndices } from '@/lib/music-theory/scales'
 import GuitarChordDiagram from './GuitarChordDiagram'
 import GuitarFretboard from './GuitarFretboard'
+import { transposeChordName } from '@/lib/music-theory/notes'
 
 type SubTab = 'capo' | 'chords' | 'scales' | 'progression'
 
@@ -54,7 +56,7 @@ function CapoTab() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-studio-muted">Capo Calculator</p>
+        <p className="text-xs uppercase tracking-widest text-studio-muted">Capo Calculator</p>
         <p className="text-xs text-studio-muted">
           Choose your target key and capo position. See which open shapes to play.
         </p>
@@ -62,7 +64,7 @@ function CapoTab() {
         <div className="grid grid-cols-2 gap-4">
           {/* Target key */}
           <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-widest text-studio-muted">Target Key</p>
+            <p className="text-xs uppercase tracking-widest text-studio-muted">Target Key</p>
             <div className="relative">
               <select
                 value={targetKey}
@@ -83,7 +85,7 @@ function CapoTab() {
 
           {/* Capo fret */}
           <div className="space-y-2">
-            <p className="text-[10px] uppercase tracking-widest text-studio-muted">Capo Fret</p>
+            <p className="text-xs uppercase tracking-widest text-studio-muted">Capo Fret</p>
             <div className="flex gap-1 flex-wrap">
               {CAPO_FRETS.map(f => (
                 <button
@@ -93,7 +95,7 @@ function CapoTab() {
                     'h-8 w-8 rounded-lg text-xs font-mono font-medium transition-all border',
                     capoFret === f
                       ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-transparent'
+                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                   )}
                 >
                   {f === 0 ? '—' : f}
@@ -107,15 +109,15 @@ function CapoTab() {
         <div className="rounded-xl bg-studio-bg/60 border border-studio-border p-3">
           <div className="flex gap-6 text-sm">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-studio-muted">Target Key</p>
+              <p className="text-xs uppercase tracking-widest text-studio-muted">Target Key</p>
               <p className="font-semibold text-studio-accent mt-0.5">{targetKey} Major</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-studio-muted">Capo Position</p>
+              <p className="text-xs uppercase tracking-widest text-studio-muted">Capo Position</p>
               <p className="font-semibold text-studio-purple mt-0.5">{capoFret === 0 ? 'No capo' : `Fret ${capoFret}`}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-studio-muted">Play as</p>
+              <p className="text-xs uppercase tracking-widest text-studio-muted">Play as</p>
               <p className="font-semibold text-studio-text mt-0.5">{shapeRoot} shapes</p>
             </div>
           </div>
@@ -126,7 +128,7 @@ function CapoTab() {
       {keyShapes.length > 0 && (
         <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-3">
           <div>
-            <p className="text-[10px] uppercase tracking-widest text-studio-muted">Chords in {targetKey} Major</p>
+            <p className="text-xs uppercase tracking-widest text-studio-muted">Chords in {targetKey} Major</p>
             <p className="text-xs text-studio-muted mt-0.5">
               Play these shapes with capo at fret {capoFret}
             </p>
@@ -143,7 +145,7 @@ function CapoTab() {
                     barres={item.voicing.barres ?? []}
                     size="sm"
                   />
-                  <p className="text-[9px] text-studio-muted font-mono">→ {item.soundingChord}</p>
+                  <p className="text-xs text-studio-muted font-mono">→ {item.soundingChord}</p>
                 </div>
               )
             })}
@@ -153,7 +155,7 @@ function CapoTab() {
 
       {/* Quick transposition table */}
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-studio-muted">Transposition Reference</p>
+        <p className="text-xs uppercase tracking-widest text-studio-muted">Transposition Reference</p>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
@@ -198,22 +200,22 @@ function ChordsTab() {
     <div className="space-y-4">
       {/* Root + quality selectors */}
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-studio-muted">Select Chord</p>
+        <p className="text-xs uppercase tracking-widest text-studio-muted">Select Chord</p>
 
         <div className="space-y-3">
           {/* Root */}
           <div className="space-y-1.5">
-            <p className="text-[10px] text-studio-muted">Root</p>
+            <p className="text-xs text-studio-muted">Root</p>
             <div className="grid grid-cols-6 gap-1">
               {ROOTS.map((r, i) => (
                 <button
                   key={r}
                   onClick={() => setRoot(r)}
                   className={twMerge(
-                    'h-8 rounded-lg text-[11px] font-mono font-medium transition-all border',
+                    'h-8 rounded-lg text-sm font-mono font-medium transition-all border',
                     root === r
                       ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-transparent'
+                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                   )}
                 >
                   {ROOTS_LABEL[i]}
@@ -224,7 +226,7 @@ function ChordsTab() {
 
           {/* Quality */}
           <div className="space-y-1.5">
-            <p className="text-[10px] text-studio-muted">Quality</p>
+            <p className="text-xs text-studio-muted">Quality</p>
             <div className="flex flex-wrap gap-1">
               {CHORD_SUFFIXES.map(s => (
                 <button
@@ -234,7 +236,7 @@ function ChordsTab() {
                     'h-8 px-3 rounded-lg text-xs font-medium transition-all border',
                     suffix === s
                       ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-transparent'
+                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                   )}
                 >
                   {CHORD_SUFFIX_LABELS[s]}
@@ -250,7 +252,7 @@ function ChordsTab() {
         <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-4">
           <div className="flex items-start justify-between">
             <div>
-              <p className="text-[10px] uppercase tracking-widest text-studio-muted">Chord Diagram</p>
+              <p className="text-xs uppercase tracking-widest text-studio-muted">Chord Diagram</p>
               <p className="text-xl font-bold font-mono text-studio-text mt-1">{chordName}</p>
               <p className="text-xs text-studio-muted">{CHORD_SUFFIX_LABELS[suffix]}</p>
             </div>
@@ -265,13 +267,13 @@ function ChordsTab() {
 
           {/* Fret positions legend */}
           <div className="rounded-xl bg-studio-bg/60 border border-studio-border p-3">
-            <p className="text-[10px] uppercase tracking-widest text-studio-muted mb-2">String Positions</p>
+            <p className="text-xs uppercase tracking-widest text-studio-muted mb-2">String Positions</p>
             <div className="flex gap-3">
               {['Low E', 'A', 'D', 'G', 'B', 'High E'].map((str, i) => {
                 const fret = voicing.frets[i]
                 return (
                   <div key={str} className="flex flex-col items-center gap-0.5">
-                    <span className="text-[9px] text-studio-muted">{str}</span>
+                    <span className="text-xs text-studio-muted">{str}</span>
                     <span className={twMerge(
                       'text-xs font-mono font-semibold',
                       fret === -1 ? 'text-red-400' : fret === 0 ? 'text-studio-muted' : 'text-studio-accent'
@@ -283,7 +285,7 @@ function ChordsTab() {
               })}
             </div>
             {voicing.baseFret && voicing.baseFret > 1 && (
-              <p className="text-[10px] text-studio-muted mt-2">Base fret: {voicing.baseFret}</p>
+              <p className="text-xs text-studio-muted mt-2">Base fret: {voicing.baseFret}</p>
             )}
           </div>
         </div>
@@ -295,7 +297,7 @@ function ChordsTab() {
 
       {/* All variants for root */}
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-studio-muted">{root} Chord Variants</p>
+        <p className="text-xs uppercase tracking-widest text-studio-muted">{root} Chord Variants</p>
         <div className="flex flex-wrap gap-3">
           {allVariants.map(({ suffix: s, chord, voicing: v }) => (
             <button
@@ -337,22 +339,22 @@ function ScalesTab() {
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-4">
-        <p className="text-[10px] uppercase tracking-widest text-studio-muted">Fretboard Scale Map</p>
+        <p className="text-xs uppercase tracking-widest text-studio-muted">Fretboard Scale Map</p>
 
         <div className="grid grid-cols-2 gap-4">
           {/* Root */}
           <div className="space-y-1.5">
-            <p className="text-[10px] text-studio-muted">Root</p>
+            <p className="text-xs text-studio-muted">Root</p>
             <div className="grid grid-cols-6 gap-1">
               {ROOTS.map((r, i) => (
                 <button
                   key={r}
                   onClick={() => setRoot(r)}
                   className={twMerge(
-                    'h-8 rounded-lg text-[11px] font-mono font-medium transition-all border',
+                    'h-8 rounded-lg text-sm font-mono font-medium transition-all border',
                     root === r
                       ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-transparent'
+                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                   )}
                 >
                   {ROOTS_LABEL[i]}
@@ -363,7 +365,7 @@ function ScalesTab() {
 
           {/* Scale */}
           <div className="space-y-1.5">
-            <p className="text-[10px] text-studio-muted">Scale</p>
+            <p className="text-xs text-studio-muted">Scale</p>
             <div className="relative">
               <select
                 value={scaleKey}
@@ -385,7 +387,7 @@ function ScalesTab() {
 
         {/* Fret count */}
         <div className="space-y-1.5">
-          <p className="text-[10px] text-studio-muted">Frets to Show</p>
+          <p className="text-xs text-studio-muted">Frets to Show</p>
           <div className="flex gap-1">
             {[7, 12, 15].map(n => (
               <button
@@ -395,7 +397,7 @@ function ScalesTab() {
                   'h-7 px-3 rounded-lg text-xs font-mono transition-all border',
                   numFrets === n
                     ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                    : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-transparent'
+                    : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                 )}
               >
                 {n}
@@ -420,11 +422,11 @@ function ScalesTab() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-studio-accent" />
-            <span className="text-[10px] text-studio-muted">Root ({root})</span>
+            <span className="text-xs text-studio-muted">Root ({root})</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full bg-studio-purple" />
-            <span className="text-[10px] text-studio-muted">Scale notes</span>
+            <span className="text-xs text-studio-muted">Scale notes</span>
           </div>
         </div>
         <GuitarFretboard
@@ -436,7 +438,7 @@ function ScalesTab() {
 
       {/* Common chord shapes in scale */}
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-3">
-        <p className="text-[10px] uppercase tracking-widest text-studio-muted">Common Chords in {root} {scale?.name}</p>
+        <p className="text-xs uppercase tracking-widest text-studio-muted">Common Chords in {root} {scale?.name}</p>
         <p className="text-xs text-studio-muted">
           Natural chord tones built from the scale root. These voicings work well in this scale context.
         </p>
@@ -454,7 +456,7 @@ function ScalesTab() {
                   barres={v.barres ?? []}
                   size="sm"
                 />
-                <p className="text-[9px] text-studio-muted">{CHORD_SUFFIX_LABELS[s]}</p>
+                <p className="text-xs text-studio-muted">{CHORD_SUFFIX_LABELS[s]}</p>
               </div>
             )
           })}
@@ -466,40 +468,82 @@ function ScalesTab() {
 
 // ── Progression Sub-tab ─────────────────────────────────────────────────────
 
+function ProgressionChordCard({ chord }: { chord: string }) {
+  const voicings = getGuitarVoicings(chord)
+  const [voicingIdx, setVoicingIdx] = useState(0)
+
+  const activeIdx = voicings.length > 0 ? voicingIdx % voicings.length : 0
+  const activeVoicing = voicings[activeIdx]
+
+  if (!activeVoicing) {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-[140px] h-[175px] rounded-xl border border-dashed border-studio-border flex items-center justify-center">
+          <span className="text-studio-muted text-xs text-center px-2">
+            {chord}<br /><span className="text-xs opacity-50">No voicing</span>
+          </span>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-studio-border bg-studio-surface/50">
+      <GuitarChordDiagram
+        chordName={chord}
+        frets={activeVoicing.frets}
+        baseFret={activeVoicing.baseFret ?? 1}
+        barres={activeVoicing.barres ?? []}
+        size="md"
+      />
+      {voicings.length > 1 && (
+        <div className="flex items-center gap-1.5 text-[11px] font-mono text-studio-muted pt-1 border-t border-studio-border/30 w-full justify-center">
+          <button
+            onClick={() => setVoicingIdx(prev => (prev - 1 + voicings.length) % voicings.length)}
+            className="p-1 rounded hover:bg-studio-surface hover:text-studio-text transition-colors"
+            title="Previous voicing"
+          >
+            <ChevronLeft size={13} />
+          </button>
+          <span className="text-[10px]">
+            {activeIdx + 1} / {voicings.length}
+            {activeVoicing.baseFret && activeVoicing.baseFret > 1 && (
+              <span className="text-studio-accent font-bold ml-1">
+                (Fr {activeVoicing.baseFret})
+              </span>
+            )}
+          </span>
+          <button
+            onClick={() => setVoicingIdx(prev => (prev + 1) % voicings.length)}
+            className="p-1 rounded hover:bg-studio-surface hover:text-studio-text transition-colors"
+            title="Next voicing"
+          >
+            <ChevronRight size={13} />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function ProgressionTab() {
   const [input, setInput] = useState('C Am F G')
   const [transpose, setTranspose] = useState(0)
 
-  const NOTE_NAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
-  const FLAT_TO_SHARP: Record<string,string> = { Db:'C#',Eb:'D#',Fb:'E',Gb:'F#',Ab:'G#',Bb:'A#',Cb:'B' }
-
-  function transposeNote(root: string, semitones: number): string {
-    const r = FLAT_TO_SHARP[root] ?? root
-    const idx = NOTE_NAMES.indexOf(r)
-    if (idx === -1) return root
-    return NOTE_NAMES[((idx + semitones) % 12 + 12) % 12]
-  }
-
-  function transposeChord(chord: string, semitones: number): string {
-    const m = chord.match(/^([A-G][#b]?)(.*)$/)
-    if (!m) return chord
-    return transposeNote(m[1], semitones) + m[2]
-  }
-
   const parsedChords = input
     .split(/[\s,|/]+/)
     .filter(Boolean)
-    .map(c => transposeChord(c, transpose))
+    .map(c => transposeChordName(c, transpose))
 
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-studio-border bg-studio-surface p-5 space-y-4">
         <p className="text-xs font-semibold text-studio-text">Chord Progression Viewer</p>
-        <p className="text-[11px] text-studio-muted">Enter chord names to see diagrams. Use spaces or commas to separate.</p>
+        <p className="text-sm text-studio-muted">Enter chord names to see diagrams. Use spaces or commas to separate.</p>
 
         {/* Input */}
         <div>
-          <label className="text-[10px] uppercase tracking-widest text-studio-muted mb-1.5 block">Progression</label>
+          <label className="text-xs uppercase tracking-widest text-studio-muted mb-1.5 block">Progression</label>
           <input
             value={input}
             onChange={e => setInput(e.target.value)}
@@ -510,28 +554,40 @@ function ProgressionTab() {
 
         {/* Transpose control */}
         <div className="flex items-center gap-3 flex-wrap">
-          <span className="text-[10px] uppercase tracking-widest text-studio-muted shrink-0">Transpose</span>
-          <div className="flex items-center gap-1">
-            {[-6,-3,-2,-1].map(n => (
-              <button key={n} onClick={() => setTranspose(t => t + n)}
-                className="h-7 w-8 rounded-md border border-studio-border text-[10px] font-mono text-studio-muted hover:text-studio-accent hover:border-studio-accent/40 transition-all">
-                {n}
-              </button>
-            ))}
-            <span className="px-3 py-1 rounded-md bg-studio-bg border border-studio-accent/30 text-studio-accent font-mono text-xs min-w-[40px] text-center">
+          <span className="text-xs uppercase tracking-widest text-studio-muted shrink-0">Transpose</span>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={() => setTranspose(t => t - 1)}
+              className="h-8 w-8 rounded-lg border border-studio-border bg-studio-surface/40 text-sm font-bold text-studio-muted hover:text-studio-accent hover:border-studio-accent/40 hover:bg-studio-accent/5 transition-all flex items-center justify-center"
+            >
+              −
+            </button>
+            <span
+              className={twMerge(
+                'h-8 min-w-[3rem] rounded-lg border px-3 flex items-center justify-center text-xs font-mono font-bold transition-all',
+                transpose === 0
+                  ? 'border-studio-border bg-studio-bg text-studio-muted'
+                  : 'border-studio-accent/40 bg-studio-accent/10 text-studio-accent'
+              )}
+            >
               {transpose > 0 ? `+${transpose}` : transpose}
             </span>
-            {[1,2,3,6].map(n => (
-              <button key={n} onClick={() => setTranspose(t => t + n)}
-                className="h-7 w-8 rounded-md border border-studio-border text-[10px] font-mono text-studio-muted hover:text-studio-accent hover:border-studio-accent/40 transition-all">
-                +{n}
-              </button>
-            ))}
-            <button onClick={() => setTranspose(0)}
-              className="h-7 px-2 ml-1 rounded-md border border-studio-border text-[10px] text-studio-muted hover:text-red-400 transition-all">
-              Reset
+            <button
+              onClick={() => setTranspose(t => t + 1)}
+              className="h-8 w-8 rounded-lg border border-studio-border bg-studio-surface/40 text-sm font-bold text-studio-muted hover:text-studio-accent hover:border-studio-accent/40 hover:bg-studio-accent/5 transition-all flex items-center justify-center"
+            >
+              +
             </button>
+            {transpose !== 0 && (
+              <button
+                onClick={() => setTranspose(0)}
+                className="h-8 px-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-amber-400 text-[11px] font-semibold hover:bg-amber-500/20 transition-all flex items-center gap-1.5 ml-1"
+              >
+                ↺ Reset
+              </button>
+            )}
           </div>
+          <span className="text-[10px] text-studio-muted">semitones</span>
         </div>
       </div>
 
@@ -539,28 +595,9 @@ function ProgressionTab() {
       {parsedChords.length > 0 && (
         <div className="rounded-2xl border border-studio-border bg-studio-surface p-5">
           <div className="flex flex-wrap gap-4">
-            {parsedChords.map((chord, i) => {
-              const voicing = GUITAR_CHORDS[chord]
-              if (!voicing) {
-                return (
-                  <div key={i} className="flex flex-col items-center gap-2">
-                    <div className="w-[140px] h-[175px] rounded-xl border border-dashed border-studio-border flex items-center justify-center">
-                      <span className="text-studio-muted text-xs text-center px-2">{chord}<br/><span className="text-[10px] opacity-50">No voicing</span></span>
-                    </div>
-                  </div>
-                )
-              }
-              return (
-                <GuitarChordDiagram
-                  key={i}
-                  chordName={chord}
-                  frets={voicing.frets}
-                  baseFret={voicing.baseFret}
-                  barres={voicing.barres}
-                  size="md"
-                />
-              )
-            })}
+            {parsedChords.map((chord, i) => (
+              <ProgressionChordCard key={`${chord}-${i}-${transpose}`} chord={chord} />
+            ))}
           </div>
         </div>
       )}
@@ -595,10 +632,10 @@ export default function GuitarLab() {
             key={id}
             onClick={() => setSubTab(id)}
             className={twMerge(
-              'flex-1 h-8 rounded-lg text-xs font-medium transition-all',
+              'flex-1 h-9 rounded-lg text-sm font-medium transition-all',
               subTab === id
                 ? 'bg-sky-500/15 text-sky-400'
-                : 'text-studio-muted hover:text-studio-text hover:bg-white/5'
+                : 'text-studio-muted hover:text-studio-text hover:bg-white/[0.06]'
             )}
           >
             {label}

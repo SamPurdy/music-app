@@ -3,6 +3,7 @@ import { twMerge } from 'tailwind-merge'
 import { SCALES, getScaleNoteNames, getScaleNoteIndices } from '@/lib/music-theory/scales'
 import { INTERVALS } from '@/lib/music-theory/intervals'
 import PianoKeyboard from './PianoKeyboard'
+import CircleOfFifths from './CircleOfFifths'
 
 const ROOTS = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const ROOTS_LABEL = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
@@ -56,7 +57,7 @@ export default function TheoryExplorer() {
                     'h-8 rounded-lg text-[11px] font-mono font-medium transition-all border',
                     root === r
                       ? 'bg-sky-500/15 text-sky-400 border-sky-500/40'
-                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-transparent'
+                      : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                   )}
                 >
                   {ROOTS_LABEL[i]}
@@ -196,6 +197,17 @@ export default function TheoryExplorer() {
           ))}
         </div>
       </div>
+
+      {/* Circle of Fifths */}
+      <CircleOfFifths
+        selectedKey={root}
+        onKeyChange={(key) => {
+          // Map flat spellings back to the sharp spellings used in ROOTS if needed
+          const flatToSharp: Record<string, string> = { Db: 'C#', Eb: 'D#', Ab: 'G#', Bb: 'A#' }
+          const mapped = flatToSharp[key] ?? key
+          if (ROOTS.includes(mapped)) setRoot(mapped)
+        }}
+      />
     </div>
   )
 }

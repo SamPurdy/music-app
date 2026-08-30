@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import * as Tone from 'tone'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Play, Shuffle, Download, Music2, Layers, Loader2 } from 'lucide-react'
+import { Play, Shuffle, Download, Music2, Layers, Loader2, Send } from 'lucide-react'
 import { twMerge } from 'tailwind-merge'
-import { generateMajorProgression, generateMinorProgression } from '@/lib/music-theory/progressions'
+import { generateMajorProgression, generateRandomProgression } from '@/lib/music-theory/progressions'
 import type { ChordQuality } from '@/types'
-import { playPianoChord, playGuitarChord, chordNotesToNoteNames } from '@/lib/audio/synth'
+import { playPianoChord, playGuitarChord, chordNotesToNoteNames, ensureInstrumentLoaded } from '@/lib/audio/synth'
+import ChordFunctionExplainer from '@/components/ChordFunctionExplainer'
+import { exportProgressionToMidi } from '@/lib/midi/export'
 
 const KEYS        = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const KEYS_LABEL  = ['C', 'C♯', 'D', 'D♯', 'E', 'F', 'F♯', 'G', 'G♯', 'A', 'A♯', 'B']
@@ -21,19 +23,23 @@ const QUALITY_STYLE: Record<Quality, { bg: string; border: string; text: string;
 
 type Progression = ReturnType<typeof generateMajorProgression>
 
-export default function ChordProgressionDisplay() {
+interface Props {
+  onSendToSong?: (prog: { key: string; chords: string[] }) => void
+}
+
+export default function ChordProgressionDisplay({ onSendToSong }: Props) {
   const [key, setKey]           = useState('C')
   const [mode, setMode]         = useState<'major' | 'minor'>('major')
   const [length, setLength]     = useState(4)
   const [result, setResult]     = useState<Progression | null>(null)
   const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano')
   const [isPlaying, setIsPlaying] = useState(false)
+  const [selectedChordIndex, setSelectedChordIndex] = useState<number | null>(null)
 
   const generate = () => {
-    const prog = mode === 'major'
-      ? generateMajorProgression(key, length)
-      : generateMinorProgression(key, length)
+    const prog = generateRandomProgression(key, length, mode)
     setResult(prog)
+    setSelectedChordIndex(null)
   }
 
   const playChord = (notes: string[]) => {
@@ -49,8 +55,19 @@ export default function ChordProgressionDisplay() {
     if (!result || isPlaying) return
     setIsPlaying(true)
     await Tone.start()
+    try {
+      await ensureInstrumentLoaded(instrument)
+    } catch (e) {
+      console.error('Failed to load instrument:', e)
+    }
+    
+    // Play all chords with proper timing
     for (let i = 0; i < result.chords.length; i++) {
-      await new Promise<void>(resolve => setTimeout(resolve, i === 0 ? 0 : 2000))
+      // Add delay between chords except for first one
+      if (i > 0) {
+        await new Promise<void>(resolve => setTimeout(resolve, 2000))
+      }
+      
       const noteNames = chordNotesToNoteNames(result.chords[i].notes, instrument)
       if (instrument === 'piano') {
         playPianoChord(noteNames, '2n').catch(() => {})
@@ -58,7 +75,10 @@ export default function ChordProgressionDisplay() {
         playGuitarChord(noteNames, '2n').catch(() => {})
       }
     }
-    setTimeout(() => setIsPlaying(false), result.chords.length * 2000 + 500)
+    
+    // Add extra delay to ensure last chord completes before stopping
+    await new Promise<void>(resolve => setTimeout(resolve, 1500))
+    setIsPlaying(false)
   }
 
   return (
@@ -121,8 +141,8 @@ export default function ChordProgressionDisplay() {
                   key={n}
                   onClick={() => setLength(n)}
                   className={twMerge(
-                    'flex-1 text-xs font-mono font-medium transition-all',
-                    length === n ? 'bg-sky-500/15 text-sky-400' : 'text-studio-muted hover:text-studio-text hover:bg-white/5'
+                    'flex-1 text-xs font-mono font-medium transition-all border-r border-studio-border last:border-none',
+                    length === n ? 'bg-sky-500/15 text-sky-400 border-sky-500/40' : 'text-studio-muted hover:text-studio-text hover:bg-white/5 border-studio-border/60'
                   )}
                 >
                   {n}
@@ -131,16 +151,16 @@ export default function ChordProgressionDisplay() {
             </div>
           </div>
 
-          {/* Generate */}
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={generate}
-            className="h-9 px-5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-sky-600/20 shrink-0"
-          >
-            <Play size={12} fill="currentColor" />
-            Generate
-          </motion.button>
+           {/* Generate */}
+           <motion.button
+             whileHover={{ scale: 1.02 }}
+             whileTap={{ scale: 0.97 }}
+             onClick={generate}
+             className="h-9 px-5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold flex items-center gap-2 transition-colors shadow-lg shadow-sky-600/20 shrink-0"
+           >
+             <Play size={12} fill="currentColor" />
+             Generate Random
+           </motion.button>
         </div>
       </div>
 
@@ -195,14 +215,33 @@ export default function ChordProgressionDisplay() {
                     : <Play size={13} fill="currentColor" />}
                 </button>
                 <span className="text-[11px] text-studio-muted">{result.chords.length} chords</span>
-                <button
-                  onClick={generate}
-                  className="p-1.5 rounded-lg text-studio-muted hover:text-studio-text hover:bg-studio-surface border border-transparent hover:border-studio-border transition-all"
-                  title="Regenerate"
-                >
-                  <Shuffle size={13} />
+                 <button
+                   onClick={generate}
+                   className="p-1.5 rounded-lg text-studio-muted hover:text-studio-text hover:bg-studio-surface border border-transparent hover:border-studio-border transition-all"
+                   title="Regenerate with random chords"
+                 >
+                   <Shuffle size={13} />
                 </button>
                 <button
+                  onClick={() => onSendToSong?.({ key: result.key, chords: result.chords.map(c => c.full) })}
+                  disabled={!onSendToSong}
+                  className="p-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 transition-colors flex items-center gap-1 text-[10px] font-semibold px-2.5"
+                  title="Send progression to Song tab"
+                >
+                  <Send size={11} />
+                  Song
+                </button>
+                <button
+                  onClick={() => {
+                    if (result) {
+                      exportProgressionToMidi(
+                        result.chords.map(c => c.full),
+                        result.key,
+                        120,
+                        `${result.key.replace('#', 's')}_progression`
+                      )
+                    }
+                  }}
                   className="p-1.5 rounded-lg text-studio-muted hover:text-studio-text hover:bg-studio-surface border border-transparent hover:border-studio-border transition-all"
                   title="Export MIDI"
                 >
@@ -222,21 +261,23 @@ export default function ChordProgressionDisplay() {
                     initial={{ opacity: 0, scale: 0.88 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: i * 0.04, duration: 0.22 }}
+                    onClick={() => setSelectedChordIndex(selectedChordIndex === i ? null : i)}
                     className={twMerge(
-                      'group relative p-4 rounded-xl border cursor-default transition-all hover:-translate-y-0.5 hover:shadow-lg',
-                      style.bg, style.border
+                      'group relative p-4 rounded-xl border cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-lg',
+                      style.bg, style.border,
+                      selectedChordIndex === i && 'ring-2 ring-offset-1 ring-offset-studio-bg ring-studio-accent/60'
                     )}
                   >
                     {/* Position */}
                     <div className="absolute top-2.5 right-2.5 flex items-center gap-1">
                       <button
-                        onClick={() => playChord(chord.notes)}
+                        onClick={(e) => { e.stopPropagation(); playChord(chord.notes) }}
                         className="p-1.5 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors opacity-0 group-hover:opacity-100"
                         title="Play chord"
                       >
                         <Play size={10} fill="currentColor" />
                       </button>
-                      <span className="text-[9px] font-mono text-studio-muted/40">{i + 1}</span>
+                      <span className="text-[9px] font-mono text-studio-muted/70">{i + 1}</span>
                     </div>
 
                     {/* Roman numeral */}
@@ -278,6 +319,30 @@ export default function ChordProgressionDisplay() {
                 )
               })}
             </div>
+
+            {/* Chord Function Explainer */}
+            <AnimatePresence>
+              {selectedChordIndex !== null && result.chords[selectedChordIndex] && (() => {
+                const c = result.chords[selectedChordIndex]
+                return c.roman ? (
+                  <motion.div
+                    key={`explainer-${selectedChordIndex}`}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.25 }}
+                    className="overflow-hidden mt-3"
+                  >
+                    <ChordFunctionExplainer
+                      roman={c.roman}
+                      chordName={c.full}
+                      keyName={`${result.key} ${mode}`}
+                      onClose={() => setSelectedChordIndex(null)}
+                    />
+                  </motion.div>
+                ) : null
+              })()}
+            </AnimatePresence>
           </motion.div>
         ) : (
           <motion.div

@@ -23,11 +23,18 @@ React 19 + TS + Vite + Tailwind CSS + Tone.js + Tonal.js. No backend. Port 5173.
 - theory → `TheoryExplorer.tsx`
 - guitar → `GuitarLab.tsx`
 
+## Cross-Tab Data Flow (App.tsx)
+`App.tsx` owns `pendingProgression: { key, chords: string[] } | null`.
+- Set by `handleSendToSong()` called from `ChordProgressionDisplay` via `onSendToSong` prop
+- Consumed by `SongStructureBuilder` via `pendingProgression` + `onClearPending` props
+- Setting it also switches `activeTab` to `'song'` automatically
+
 ## Audio — ONLY via `src/lib/audio/synth.ts`
 ```ts
 playPianoNote(noteIdx, octave)  playGuitarNote(noteIdx, octave)
-playPianoChord(chordName)       playGuitarChord(chordName)
+playPianoChord(noteNames)       playGuitarChord(noteNames)
 playProgression(chords[], instrument)
+chordNotesToNoteNames(chord.notes, instrument)  // ← REQUIRED before play calls
 // Always: somePlayFn(...).catch(() => {})
 ```
 
@@ -38,8 +45,13 @@ SCALES['major' | 'naturalMinor' | 'dorian' | 'blues' | ...]  → { name, interva
 getScaleNoteIndices(root, scaleKey)  // returns 0-11 indices including root
 // SCALES intervals do NOT include 0 — root is always implied
 
+// chord-functions.ts  ← NEW
+getChordFunction(roman: string): ChordFunctionInfo | null
+// Returns: { roman, name, shortDesc, fullDesc, tension (0-10), commonCadences[], songwritingTip, color }
+// Covers: I ii iii IV V vi vii° i ii° ♭III iv v ♭VI ♭VII
+
 // notes.ts: noteToMidi(), midiToNote(), getChordNotes(), getRomanNumeral()
-// progressions.ts: generateMajorProgression(), suggestProgressions()
+// progressions.ts: generateMajorProgression(), generateRandomProgression(), suggestProgressions()
 // guitar/chords.ts: GUITAR_CHORDS map, transposeChord(chord, semitones)
 ```
 
@@ -55,10 +67,18 @@ onNoteClick?: (idx: number) => void
 // Usage: scaleNotes={noteIndices.filter(n => n !== rootIdx)}
 ```
 
+## SongStructureBuilder — Section.chords is a STRING
+```ts
+// ⚠️ chords is "Am  F  C  G" — space-separated string, NOT string[]
+// Split:  section.chords.split(/[\s,]+/).filter(Boolean)
+// Join:   chords.join('  ')
+```
+
 ## Colors (Tailwind)
 ```
-studio-bg=#090c12  studio-surface=#0e1219  studio-accent=#38bdf8(root/CTA)
-studio-purple=#8b5cf6(scale)  studio-muted=#64748b  studio-border=white/8
+studio-bg=#090c12  studio-surface=#0e1219  studio-surface-2=#131922
+studio-accent=#38bdf8(sky/CTA)  studio-purple=#8b5cf6  studio-muted=#64748b
+studio-border=white/8  studio-success=#10b981  studio-pink=#ec4899
 ```
 
 ## Rules

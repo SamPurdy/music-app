@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      TODO: Update these three meta tags for your app.
+      - description: used by search engines and link-preview cards
+      - theme-color: browser chrome color on mobile (match your app-bg token)
+      - title: browser tab title
+    -->
+    <meta name="description" content="My App — a web application" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0b0e14" />
+    <title>My App</title>
+
+    <!--
+      Google Fonts — Inter for body text.
+      TODO: If you change the font in tailwind.config.js, update the URL here too.
+      To remove the font entirely, delete these three lines and update tailwind.config.js.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+
+  <!--
+    bg-[#0b0e14] matches app-bg in tailwind.config.js.
+    This inline style prevents a flash of white before React mounts.
+    TODO: Update hex to match your app-bg token if you change it.
+  -->
+  <body style="margin: 0; padding: 0; background: #0b0e14; color: #e2e8f0;">
+    <div id="root"></div>
+
+    <!--
+      ═══════════════════════════════════════════════════════════════
+      DEV-ONLY RUNTIME ERROR TOAST
+      ═══════════════════════════════════════════════════════════════
+      This script catches JavaScript errors and unhandled Promise
+      rejections that occur *outside* React's render cycle — for
+      example, in event handlers, async callbacks, or third-party code.
+
+      When an error is caught on localhost, a dismissible red toast
+      appears in the bottom-right corner of the page showing:
+        • The error message
+        • Source file + line number (when available)
+
+      WHY: Local AI models (and developers) often can't open browser
+      DevTools. Making errors visible on-screen lets the model iterate
+      without needing out-of-band tooling.
+
+      For React render errors, see src/components/DevErrorBoundary.tsx
+      which shows a full-screen panel with the component stack.
+
+      SAFETY: The script checks location.hostname and only activates on
+      localhost / 127.0.0.1. Production builds minify this away, but
+      the hostname check is a belt-and-suspenders guard.
+
+      You do NOT need to change this script.
+      ═══════════════════════════════════════════════════════════════
+    -->
+    <script>
+      (function () {
+        // Only run on local development — never in production
+        if (!['localhost', '127.0.0.1', '::1'].includes(location.hostname)) return;
+
+        /**
+         * Shows (or updates) a red toast in the bottom-right corner.
+         * Clicking it dismisses it.
+         * @param {string} msg - Human-readable error description
+         */
+        function showToast(msg) {
+          var el = document.getElementById('__dev-error-toast');
+          if (!el) {
+            el = document.createElement('div');
+            el.id = '__dev-error-toast';
+            Object.assign(el.style, {
+              position: 'fixed',
+              bottom: '1rem',
+              right: '1rem',
+              zIndex: '99999',
+              background: '#1c0a0a',
+              border: '1px solid #7f1d1d',
+              borderRadius: '8px',
+              color: '#fca5a5',
+              fontFamily: 'monospace',
+              fontSize: '0.8rem',
+              padding: '0.75rem 1rem',
+              maxWidth: '500px',
+              whiteSpace: 'pre-wrap',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
+              cursor: 'pointer',
+            });
+            el.title = 'Click to dismiss';
+            el.onclick = function () { el.remove(); };
+            document.body.appendChild(el);
+          }
+          el.textContent = '⚠ Runtime Error\n' + msg;
+        }
+
+        // Catch synchronous JS errors (e.g. ReferenceError, TypeError)
+        window.addEventListener('error', function (e) {
+          showToast(
+            (e.message || String(e)) +
+            '\n' +
+            (e.filename ? e.filename + ':' + e.lineno : '')
+          );
+        });
+
+        // Catch unhandled Promise rejections (e.g. failed fetch, async throws)
+        window.addEventListener('unhandledrejection', function (e) {
+          var reason = e.reason;
+          showToast(reason && reason.message ? reason.message : String(reason));
+        });
+      })();
+    </script>
+
+    <!-- Entry point — Vite resolves this module graph -->
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -11,14 +11,15 @@
     --studio-bg-secondary: #0d1119;
     --studio-surface: #11151d;
     --studio-surface-light: #131822;
-    --studio-border: rgba(255, 255, 255, 0.1);
-    --studio-border-hover: rgba(255, 255, 255, 0.15);
+    --studio-border: rgba(255, 255, 255, 0.12);
+    --studio-border-hover: rgba(255, 255, 255, 0.22);
     --studio-accent-primary: #38bdf8;
     --studio-accent-glow: rgba(56, 189, 248, 0.3);
     --studio-success: #22c55e;
     --studio-warning: #f59e0b;
     --studio-purple: #a78bfa;
     --studio-indigo: #818cf8;
+    --studio-muted: #94a3b8;
   }
 
   *, *::before, *::after {
@@ -68,8 +69,8 @@ code, kbd {
 
 .studio-glass-hover:hover {
   background: rgba(17, 21, 29, 0.6);
-  border-color: rgba(255, 255, 255, 0.15);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
 /* Animated gradient backgrounds */

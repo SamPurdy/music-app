@@ -1,36 +1,64 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import type { CreativeSuggestion } from '@/types'
-import { suggestProgressions } from '@/lib/music-theory/progressions'
+import { suggestProgressions, romanToChords } from '@/lib/music-theory/progressions'
 import { Sparkles, Flame, Zap, Wand2, ArrowRight, Play } from 'lucide-react'
 import { playProgression } from '@/lib/audio/synth'
+import EmotionChordMapper from './EmotionChordMapper'
+
+interface InspirationSuggestion extends CreativeSuggestion {
+  playableChords?: string | null
+}
+
+// Parse roman numeral pattern by delegating to romanToChords — kept for display use only
+function parseRomanNumerals(pattern: string): string[] {
+  const cleaned = pattern.replace(/^try\s+/i, '')
+  return cleaned.split(/\s*[–—\-]\s*|\s+/).map(t => t.trim()).filter(Boolean)
+}
 
 export default function CreativeInspiration() {
-  const [suggestions, setSuggestions] = useState<CreativeSuggestion[]>([])
+  const [suggestions, setSuggestions] = useState<InspirationSuggestion[]>([])
   const [currentKey, setCurrentKey] = useState('C')
-  const currentScale = 'major'
+  const [currentScaleType, setCurrentScaleType] = useState<'major' | 'minor'>('major')
   const [currentGenre, setCurrentGenre] = useState('pop')
   const [instrument, setInstrument] = useState<'piano' | 'guitar'>('piano')
-
-  const playChordSuggestion = (content: string) => {
-    playProgression(content, instrument).catch(() => {})
-  }
 
   // Debounced key change to avoid too many suggestions
   useEffect(() => {
     const timeout = setTimeout(() => {
-      setSuggestions(
-        suggestProgressions(currentKey, currentGenre).map(p => ({
-          type: p.type as CreativeSuggestion['type'],
-          content: `Try ${p.content}`,
-          context: p.context,
-          confidence: 0.8
-        }))
-      )
+      // Get base suggestions from library (for content/context/confidence)
+      const baseSuggestions: InspirationSuggestion[] = suggestProgressions(currentKey, currentGenre).map(p => ({
+        type: p.type as CreativeSuggestion['type'],
+        content: `Try ${p.content}`,
+        context: p.context,
+        confidence: 0.8,
+        playableChords: null // Will be set for chord-type suggestions below
+      }))
+
+      // Generate playable chords for all chord-type suggestions
+      if (baseSuggestions.some(s => s.type === 'chord')) {
+        baseSuggestions.forEach(s => {
+          if (s.type === 'chord') {
+            // Derive scale type from Roman numerals: minor progressions use lowercase i as first numeral
+            const firstNumeral = parseRomanNumerals(s.content)[0] ?? ''
+            const scaleType = /^[iv°♭]/.test(firstNumeral) ? 'minor' : currentScaleType
+            const chords = romanToChords(s.content, currentKey, scaleType)
+            s.playableChords = chords.length > 0 ? chords.join(' - ') : null
+          }
+        })
+      }
+
+      setSuggestions(baseSuggestions)
     }, 500)
 
     return () => clearTimeout(timeout)
-  }, [currentKey, currentGenre])
+  }, [currentKey, currentGenre, currentScaleType])
+
+  const playChordSuggestion = (suggestion: InspirationSuggestion) => {
+    if (suggestion.playableChords) {
+      playProgression(suggestion.playableChords, instrument).catch(() => {})
+    }
+  }
 
   const clearSuggestions = () => {
     setSuggestions([])
@@ -78,18 +106,28 @@ export default function CreativeInspiration() {
             </select>
           </div>
 
-          {/* Scale Badge */}
-          <div className="flex-1 min-w-0 relative p-2 rounded-lg border border-studio-border/60 bg-gradient-to-br from-purple-500/8 to-transparent backdrop-blur-sm shadow-inner flex items-center justify-between group-focus-within:border-t focus-within:border-studio-accent">
-            <label className="text-xs font-medium text-studio-muted block mb-0.5 ml-1 flex items-center gap-1">
-              <Flame size={11} className="text-purple-400 shrink-0 self-end -mt-0.5" />
-              Mode
-            </label>
-            <div className="flex items-center gap-2 min-w-0 w-full p-[2px] rounded border bg-studio-bg/50">
-              <span className="w-full text-center h-8 px-3 text-sm font-bold text-studio-accent uppercase tracking-wide rounded flex-shrink-0 ring-2 ring-purple-400/30 shadow-[0_0_15px_rgba(192,132,252,0.3)] relative">
-                {currentScale}
-              </span>
-            </div>
-          </div>
+           {/* Scale Type Selector */}
+           <div className="flex-1 min-w-0 relative group">
+             <label className="text-xs font-medium text-studio-muted block mb-1.5 flex items-center gap-1.5 pl-0.5">
+               <Flame size={11} className="text-purple-400 shrink-0 self-end -mt-0.5" />
+               Scale Mode
+             </label>
+             <div className="flex rounded-lg border border-studio-border overflow-hidden bg-studio-bg/95 backdrop-blur-sm shadow-inner">
+               {(['major', 'minor'] as const).map((scale) => (
+                 <button
+                   key={scale}
+                   onClick={() => setCurrentScaleType(scale)}
+                   className={`flex-1 px-3 py-2 text-xs font-semibold uppercase tracking-wide transition-all ${
+                     currentScaleType === scale
+                       ? 'bg-studio-accent/20 border-r border-studio-border text-studio-accent'
+                       : 'border-r border-studio-border text-studio-muted hover:text-studio-text'
+                   }`}
+                 >
+                   {scale}
+                 </button>
+               ))}
+             </div>
+           </div>
 
           {/* Genre Selector */}
           <div style={{ maxWidth: '165px' }} className="flex-[2] relative group">
@@ -189,55 +227,73 @@ export default function CreativeInspiration() {
               >
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-start gap-2 min-w-0 flex-1">
-                    {/* Type badge */}
-                    <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.75 rounded border bg-black/[0.3] shadow-sm ${
-                      suggestion.type === 'chord' ? 'text-blue-400' :
-                      suggestion.type === 'lyric' ? 'text-pink-400' :
-                      suggestion.type === 'melody' ? 'text-green-400' :
-                      suggestion.type === 'structure' ? 'text-purple-400' : 'text-orange-400'
-                    }`}>
-                      {suggestion.type.charAt(0).toUpperCase() + suggestion.type.slice(1)}
-                    </span>
-                    
-                    {/* Content */}
-                    <span className="text-xs text-studio-text font-medium truncate">{suggestion.content}</span>
-                  </div>
-
-                  {/* Confidence indicator + Play button */}
-                  <div className="flex items-center gap-1 shrink-0">
-                    {suggestion.type === 'chord' && (
-                      <button
-                        onClick={() => playChordSuggestion(suggestion.content)}
-                        className="p-1.5 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors opacity-0 group-hover:opacity-100"
-                        title="Play chord"
-                      >
-                        <Play size={10} fill="currentColor" />
-                      </button>
-                    )}
-                    <div className="flex items-center gap-1 px-2 py-1 rounded-lg border border-studio-border/50 bg-studio-surface">
-                      <motion.div
-                        animate={{ opacity: [0.4, 1, 0.4] }}
-                        transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
-                        className="w-1.5 h-1.5 rounded-full bg-green-400/80 shadow-[0_0_6px_rgba(74,222,128,0.6)]"
-                      />
-                      <span className="text-[9px] font-mono text-studio-muted">{Math.round(suggestion.confidence * 100)}%</span>
+                  {/* Type badge */}
+                  <span className={`text-[9px] font-bold uppercase tracking-widest px-2 py-0.75 rounded border bg-black/[0.3] shadow-sm ${
+                    suggestion.type === 'chord' ? 'text-blue-400' :
+                    suggestion.type === 'lyric' ? 'text-pink-400' :
+                    suggestion.type === 'melody' ? 'text-green-400' :
+                    suggestion.type === 'structure' ? 'text-purple-400' : 'text-orange-400'
+                  }`}>
+                    {suggestion.type.charAt(0).toUpperCase() + suggestion.type.slice(1)}
+                  </span>
+                  
+                   {/* Content */}
+                   <div className="flex items-center gap-2 min-w-0 flex-1">
+                     <span className="text-xs text-studio-text font-medium truncate">{suggestion.content}</span>
+                     
+                      {/* Playable chords display (when key is selected) */}
+                      {(suggestion as InspirationSuggestion).playableChords && (
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="text-[9px] text-studio-muted uppercase tracking-wider font-semibold opacity-70">as:</span>
+                          <span className="text-xs bg-studio-accent/10 px-2 py-0.5 rounded border border-studio-accent/30 text-studio-accent font-medium whitespace-nowrap max-w-[180px] truncate">
+                            {(suggestion as InspirationSuggestion).playableChords}
+                          </span>
+                        </div>
+                      )}
+                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Context */}
-                {suggestion.context && (
-                  <p className="mt-2 text-[9px] text-studio-muted uppercase tracking-wider font-medium">
-                    <span className="opacity-50 mr-1">//</span> {suggestion.context}
-                  </p>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
+                    {/* Confidence indicator + Play button */}
+                    <div className="flex items-center gap-1 shrink-0">
+                      {suggestion.type === 'chord' && (suggestion as InspirationSuggestion).playableChords ? (
+                        <button
+                          onClick={() => playChordSuggestion(suggestion)}
+                          className="p-2 rounded-lg bg-studio-accent/10 hover:bg-studio-accent/20 border border-studio-accent/30 text-studio-accent transition-colors opacity-100 group-hover:opacity-100"
+                          title={`Play ${(suggestion as InspirationSuggestion).playableChords}`}
+                        >
+                          <Play size={12} fill="currentColor" />
+                        </button>
+                      ) : (
+                        suggestion.type === 'chord' && (
+                          <div className="px-3 py-1.5 rounded-lg border border-studio-border/50 bg-studio-surface text-[9px] font-medium text-studio-muted opacity-60">
+                            Click key to play
+                          </div>
+                        )
+                      )}
+                      <div className="flex items-center gap-1 px-2 py-1 rounded-lg border border-studio-border/50 bg-studio-surface">
+                       <motion.div
+                         animate={{ opacity: [0.4, 1, 0.4] }}
+                         transition={{ duration: 3, repeat: Infinity, repeatType: 'reverse' }}
+                         className="w-1.5 h-1.5 rounded-full bg-green-400/80 shadow-[0_0_6px_rgba(74,222,128,0.6)]"
+                       />
+                       <span className="text-[9px] font-mono text-studio-muted">{Math.round(suggestion.confidence * 100)}%</span>
+                     </div>
+                   </div>
+                 </div>
 
-      {/* Footer Info */}
+                  {/* Context paragraph */}
+                  {suggestion.context && (
+                    <p className="mt-2 text-[9px] text-studio-muted uppercase tracking-wider font-medium">
+                      <span className="opacity-50 mr-1">//</span> {suggestion.context}
+                    </p>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Footer Info */}
       <div className="pt-3 border-t border-studio-border/50">
         <div className="flex items-center gap-2 text-[10px] text-studio-muted uppercase tracking-wider px-3 py-2 rounded-lg bg-white/[0.01] border border-studio-border hover:border-studio-accent/40 transition-all studio-glass">
           {/* Status indicator */}
@@ -246,12 +302,17 @@ export default function CreativeInspiration() {
           {/* Metadata */}
           <div className="flex flex-col items-start">
             <span className="font-mono text-studio-accent tracking-wide">{currentKey}</span>
-            <span className="text-[9px] opacity-70">{currentScale.toUpperCase()}</span>
+            <span className="text-[9px] opacity-70">{currentScaleType.toUpperCase()}</span>
           </div>
           
           {/* Genre */}
           <span className="ml-1 opacity-60" style={{ opacity: currentGenre === 'pop' ? '0.85' : '0.4' }}>{currentGenre}</span>
         </div>
+      </div>
+
+      {/* Emotion → Chord Mapper */}
+      <div className="border-t border-studio-border/50 pt-6 mt-2">
+        <EmotionChordMapper />
       </div>
     </div>
   )

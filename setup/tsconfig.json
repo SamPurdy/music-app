@@ -1,0 +1,33 @@
+{
+  // TypeScript configuration for the main app source.
+  // Key settings explained:
+  //   "strict": true          — enables all strict type checks (recommended)
+  //   "noUnusedLocals/Params" — catches dead code early
+  //   "paths / baseUrl"       — enables @/* import aliases (e.g. import foo from '@/lib/utils')
+  //   "noEmit": true          — TS only type-checks; Vite handles the actual compilation
+  "compilerOptions": {
+    "ignoreDeprecations": "6.0",
+    "target": "ES2020",
+    "useDefineForClassFields": true,
+    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "skipLibCheck": true,
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    // TODO: Update baseUrl if you restructure the project
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src"],
+  "references": [{ "path": "./tsconfig.node.json" }]
+}

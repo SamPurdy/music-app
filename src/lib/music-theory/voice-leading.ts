@@ -1,9 +1,10 @@
 import type { Chord, Voice } from '@/types'
-import { NOTE_NAMES } from './notes'
+import { NOTE_NAMES, FLAT_TO_SHARP } from './notes'
 
 function noteIndex(note: string): number {
   const pitchClass = note.split(/\d/)[0] ?? ''
-  return NOTE_NAMES.findIndex(n => n.toLowerCase() === pitchClass.toLowerCase())
+  const resolved = FLAT_TO_SHARP[pitchClass] ?? pitchClass
+  return NOTE_NAMES.findIndex(n => n.toLowerCase() === resolved.toLowerCase())
 }
 
 function getVoiceMotion(from: string, to: string): Voice['motion'] {

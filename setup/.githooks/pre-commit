@@ -1,0 +1,46 @@
+#!/bin/bash
+# ─────────────────────────────────────────────────────────────────────────────
+# pre-commit hook — warns when src/ changes are committed without updating
+# docs/HANDOFF.md, which is the session handoff document for local AI models.
+#
+# HOW TO ACTIVATE (one-time, per clone):
+#   git config core.hooksPath .githooks
+#
+# HOW TO BYPASS (when you genuinely don't need a handoff update):
+#   git commit --no-verify
+#
+# POLICY: This hook is NON-BLOCKING (exits 0). It only prints a warning.
+# It will never hard-stop a commit.
+# ─────────────────────────────────────────────────────────────────────────────
+
+HANDOFF="docs/HANDOFF.md"
+STAGED=$(git diff --cached --name-only)
+
+# Check whether any files under src/ are staged for this commit
+SRC_CHANGED=$(echo "$STAGED" | grep -c "^src/")
+
+if [ "$SRC_CHANGED" -gt 0 ]; then
+  # src/ files are staged — HANDOFF.md should also be staged so the next
+  # session knows what was done and what comes next
+  HANDOFF_STAGED=$(echo "$STAGED" | grep -c "^docs/HANDOFF.md")
+
+  if [ "$HANDOFF_STAGED" -eq 0 ]; then
+    # Print warning in yellow
+    echo ""
+    echo -e "\033[33m⚠️  WARNING: You are committing src/ changes but docs/HANDOFF.md has NOT been updated.\033[0m"
+    echo ""
+    echo "   The local model should update HANDOFF.md at the end of each session."
+    echo "   This helps the next session start with full context — quickly and cheaply."
+    echo ""
+    echo "   To update HANDOFF.md first:"
+    echo "   Edit docs/HANDOFF.md, then: git add docs/HANDOFF.md && git commit"
+    echo ""
+    echo "   To skip this warning and commit anyway:"
+    echo "   git commit --no-verify"
+    echo ""
+    # exit 0 = warn only, never block
+    exit 0
+  fi
+fi
+
+exit 0
